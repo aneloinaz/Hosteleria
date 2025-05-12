@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <title>Formulario de Reserva</title>
   <link rel="stylesheet" href="clientereserva.css">
-  
-  <style>
-   
-  </style>
 </head>
 <script>
     // Recupera los valores guardados
@@ -29,7 +25,17 @@
       <h2>RESUMEN DE LA RESERVA</h2>
       <hr>
       <p><strong>DÍA:</strong> <input type="date" class="fecha"> </p>
-      <p><strong>HORA:</strong> </p>
+      <p><strong>HORA:</strong> 
+      <select name="horas" id="horario">
+        <option value="12.00">12.00</option>
+        <option value="13.00">13.00</option>
+        <option value="14.00">14.00</option>
+        <option value="15.00">15.00</option>
+        <option value="16.00">16.00</option>
+        <option value="17.00">17.00</option>
+        <option value="18.00">18.00</option>
+        <option value="19.00">19.00</option>
+      </select></p>
     </div>
 
     <form class="formulario">
@@ -54,6 +60,6 @@
       <button type="submit" class="continuar-btn">CONTINUAR</button>
     </form>
   </div>
-
+  <script src="ConfirmacionReserva.html"></script>
 </body>
 </html>
