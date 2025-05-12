@@ -37,6 +37,37 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("telefono", telefono);
       localStorage.setItem("email", email);
       localStorage.setItem("personas", personas);
+      
+      fetch("Api", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          fecha,
+          hora,
+          nombre,
+          apellido,
+          telefono,
+          email,
+          personas
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Error al enviar la reserva");
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Reserva enviada con éxito:", data);
+        // Redirigir después del éxito
+        window.location.href = "ConfirmacionReserva.html";
+      })
+      .catch(error => {
+        console.error("Error en la solicitud:", error);
+        alert("Ocurrió un error al enviar la reserva.");
+      });
   
       // Redirigir a la página de confirmación
       window.location.href = "ConfirmacionReserva.html";
