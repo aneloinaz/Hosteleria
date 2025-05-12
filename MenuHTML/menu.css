@@ -54,7 +54,8 @@
         color: white;
         text-decoration: none;
     }
-  
+
+ 
   /* Productos */
   .products {
     display: grid;
@@ -141,6 +142,7 @@
     padding: 10px 55px;
     
   }
+  
 
    /* Cobrar */
    .Resumenpedido {
