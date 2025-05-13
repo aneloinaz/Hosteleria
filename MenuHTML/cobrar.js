@@ -5,11 +5,29 @@ function resumenTicket() {
 }
 // 
 function cancelarPago() {
-    if (confirm('¿Estás seguro de finalizar la compra?')) {
+    if (confirm('¿Estás seguro de cancelar la operació?')) {
         // Confirmar antes de vaciar el carrito
-        localStorage.removeItem('carrito');  // Eliminar carrito del localStorage
-        mostrarCarrito();  // Actualizar la vista del carrito 
+        localStorage.removeItem('pedido');  // Eliminar carrito del localStorage
+        resumenTicket();  // Actualizar la vista del carrito 
+        window.location.href = 'menu.html';
     } else {
-        alert('Compra cancelada');
+        alert('Operacion cancelada');
     }
+}
+
+function PagoTarjeta() {
+    alert('La operación se ha realizado con éxito');
+    window.location.href = 'factura.html';
+}
+
+function PagoEfectivo() {
+let total = totalTicket(); // Obtener el total desde la función totalTicket()
+let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
+let cambio = recibido - total;
+
+if (cambio === 0) {
+    alert('Importe exacto.');
+} else if (cambio > 0) {
+    alert(`Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`);
+} 
 }

@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>cobrar</title>
+  <title>Cobrar</title>
   <link rel="stylesheet" href="menu.css" />
 </head>
 <body>
   <main>
-  <class="container">
-    <h1 class="mesa-title">MESA</h1>
-    <div class="main">
-      <!-- Pedido -->
-      <div class="Resumenpedido">
-        <h2>PEDIDO</h2>
-        <script src="pedidos.js"></script>
-        <script src="cobrar.js"></script>
-        <div class="total">
-    </div>
-  </div>
-      <div class="pagos">
-        <h2>PAGO CON:</h2>
-        <button id="boton-tarjeta" onclick="cancelarPago()">TARJETA</button>
-        <button id="boton-efectivo">EFECTIVO</button>
-        <button id="boton-cancelar">CANCELAR</button>
+    <div class="container">
+      <h1 class="mesa-title">MESA</h1>
+      <div class="main">
+        <!-- Pedido -->
+        <div class="Resumenpedido">
+          <h2>PEDIDO</h2>
+          <div class="total">
+          </div>
+        </div>
+        <div class="pagos">
+          <h2>PAGO CON:</h2>
+          <button id="boton-tarjeta" onclick="PagoTarjeta()">TARJETA</button>
+          <button id="boton-efectivo" onclick="PagoEfectivo()">EFECTIVO</button>
+          <button id="boton-cancelar" onclick="cancelarPago()">CANCELAR</button>
+        </div>
       </div>
     </div>
   </main>
+  <!-- Asegúrate de que la ruta del script sea correcta -->
+  <script src="./cobrar.js"></script>
 </body>
-
 </html>
