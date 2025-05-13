@@ -9,8 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         //mostrar lista de categorias al cargar
         mostrarCategorias(categorias);
         mostrarSubCategorias(subcategorias);
-        //depurar
-        console.log('Subcategorías de la primera categoría:', subcategorias);
     }
     // Event listener de categorias para que muestren Subcategorias
     document.querySelectorAll('#containerCategorias li').forEach(link => {
@@ -20,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
             const subcategorias = await fetchSubCategorias(id);
-            console.log('Subcategorías:', subcategorias);
             mostrarSubCategorias(subcategorias);
         });
     });
