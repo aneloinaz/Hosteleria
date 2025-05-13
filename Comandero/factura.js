@@ -8,21 +8,28 @@ function imprimirTicket() {
     ventanaImpresion.print();
     ventanaImpresion.close();
     alert('El ticket se ha impreso correctamente');
+    window.location.href = 'menu.html';
+}
+ function calcularIVA() {
+    const total = parseFloat(document.getElementById('total').textContent);
+    const IVA = total * 0.10;
+    document.getElementById('base-iva').textContent = IVA.toFixed(2);
 }
 
-/*const metodoPago = prompt("¿Pago con tarjeta o efectivo? (Escribe 'tarjeta' o 'efectivo')").toLowerCase();
-let mensajePago = '';
-if (metodoPago === 'tarjeta') {
-    PagoTarjeta();
-    mensajePago = 'Pago realizado con tarjeta';
-} else if (metodoPago === 'efectivo') {
-    alert('Pago realizado en efectivo');
-    mensajePago = 'Pago realizado en efectivo';
-} else {
-    alert('Método de pago no válido');
-    mensajePago = 'Método de pago no válido';
+function calcularBase() {
+    const total = parseFloat(document.getElementById('total').textContent);
+    const base = total / 1.10;
+    document.getElementById('base-iva').textContent = base.toFixed(2);
 }
-document.getElementById('total').textContent = calcularTotal();
-const metodoPagoDiv = document.createElement('div');
-metodoPagoDiv.textContent = mensajePago;
-document.getElementById('ticket').appendChild(metodoPagoDiv);*/
+function calcularCuota() {
+    const total = parseFloat(document.getElementById('total').textContent);
+    const cuota = total * 0.10;
+    document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
+}
+function calcularMediaxComensal() {
+    const total = parseFloat(document.getElementById('total').textContent);
+    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1; 
+    const mediaxComensal = total / numComensales;
+    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
+}
+

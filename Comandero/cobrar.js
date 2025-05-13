@@ -6,9 +6,9 @@ function resumenTicket() {
 // 
 function cancelarPago() {
     if (confirm('¿Estás seguro de cancelar la operació?')) {
-        // Confirmar antes de vaciar el carrito
-        localStorage.removeItem('pedido');  // Eliminar carrito del localStorage
-        resumenTicket();  // Actualizar la vista del carrito 
+        
+        localStorage.removeItem('pedido'); // Eliminar el pedido del localStorage
+        resumenTicket();  // Actualizar la vista del ticket 
         window.location.href = 'menu.html';
     } else {
         alert('Operacion cancelada');
@@ -21,7 +21,7 @@ function PagoTarjeta() {
 }
 
 function PagoEfectivo() {
-let total = totalTicket(); // Obtener el total desde la función totalTicket()
+let total = totalTicket(); // Obtener el total desde la función totalTicket() 
 let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
 let cambio = recibido - total;
 

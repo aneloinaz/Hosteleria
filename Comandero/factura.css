@@ -43,3 +43,35 @@ body {
   border-top: 1px dashed #000;
   padding-top: 5px;
 }
+
+@media (max-width: 768px){
+  #ticket {
+    width: 100%;
+    padding: 10px;
+  }
+  .empresa {
+    font-size: 18px;
+  }
+  .section {
+    margin: 5px 0;
+  }
+  .items td {
+    padding: 2px 0;
+  }
+}
+
+@media (max-width: 480px){
+  #ticket {
+    width: 100%;
+    padding: 5px;
+  }
+  .empresa {
+    font-size: 16px;
+  }
+  .section {
+    margin: 3px 0;
+  }
+  .items td {
+    padding: 1px 0;
+  }
+}
