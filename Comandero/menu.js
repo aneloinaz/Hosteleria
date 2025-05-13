@@ -6,13 +6,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const subcategorias = await fetchSubCategorias(primeraId);
 
-        //mostrar lista de categorias
+        //mostrar lista de categorias al cargar
         mostrarCategorias(categorias);
         mostrarSubCategorias(subcategorias);
         //depurar
         console.log('Subcategorías de la primera categoría:', subcategorias);
     }
-
+    // Event listener de categorias para que muestren
     document.querySelectorAll('[data-categoria-id]').forEach(link => {
         link.addEventListener('click', async (e) => {
             e.preventDefault(); 
@@ -105,7 +105,7 @@ const mostrarCategorias = (categorias)=>{
 //GENERADORES PARA LISTAR PRODUCTOS
 
 // Funciones para mostrar los resultados en el DOM
-function mostrarSubcategorias(subcategorias) {
+function mostrarSubCategorias(subcategorias) {
     const container = document.getElementById('containerSubCategorias');
     container.innerHTML = ''; // Limpiar resultados previos
 
