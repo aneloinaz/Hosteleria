@@ -13,33 +13,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Subcategorías de la primera categoría:', subcategorias);
     }
     // Event listener de categorias para que muestren Subcategorias
-    document.querySelectorAll('[categiria-datos]').forEach(link => {
+    document.querySelectorAll('#containerCategorias li').forEach(link => {
         link.addEventListener('click', async (e) => {
             e.preventDefault();
-            const id = e.target.dataset.categoriaId;
+            const id = e.currentTarget.dataset.categoria;
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
             const subcategorias = await fetchSubCategorias(id);
             console.log('Subcategorías:', subcategorias);
-            mostrarSubcategorias(subcategorias);
+            mostrarSubCategorias(subcategorias);
         });
-    });
-
-    // Event listener para cuando se hace clic en una subcategoría
-    document.addEventListener('click', async (e) => {
-        if (e.target.matches('[data-subcategoria-id]')) {
-            const id = e.target.dataset.subcategoriaId;
-            const productos = await fetchProductos(id);
-            console.log('Productos:', productos);
-            mostrarProductos(productos);
-        }
     });
 });
 
-
-
 function mostrarProductos(productos) {
-    const container = document.getElementById('resultados');
+    const container = document.getElementById('containerListadoDatos');
     container.innerHTML = ''; // Limpiar resultados previos
 
     if (productos.length === 0) {
@@ -47,12 +35,91 @@ function mostrarProductos(productos) {
         return;
     }
 
-    productos.forEach(producto => {
-        const div = document.createElement('div');
-        div.textContent = `${producto.nombre} - ${producto.precio}€`;
-        container.appendChild(div);
+    const containerHTML = productos.map(producto => {
+        return `
+            <div class="productos" data-producto="${producto.id}">
+                <p>${producto.nombre}</p>
+                <span>${producto.precio}€</span>
+            </div>
+            `;
+        }).join('');
+
+    container.innerHTML = containerHTML;
+
+    document.querySelectorAll('.productos').forEach(productoEl => {
+        productoEl.addEventListener('click', () => {
+            const nombre = productoEl.querySelector('p').textContent;
+            const precio = productoEl.querySelector('span').textContent.replace('€', '');
+            agregarProductoAlPedido(nombre, precio);
+        });
     });
 }
+
+
+function agregarProductoAlPedido(nombre, precio) {
+    const pedidoLista = document.querySelector('.pedido ul');
+    const totalSpan = document.querySelector('.total span');
+
+    // Verifica si el producto ya está en la lista
+    let itemExistente = [...pedidoLista.children].find(li => li.dataset.nombre === nombre);
+
+    if (itemExistente) {
+        let cantidad = parseInt(itemExistente.dataset.cantidad) + 1;
+        itemExistente.dataset.cantidad = cantidad;
+        itemExistente.querySelector('.cantidad').textContent = `x${cantidad}`;
+        itemExistente.querySelector('.precio-total').textContent = `${(precio * cantidad).toFixed(2)}€`;
+        actualizarTotal();
+        return;
+    }
+
+    // Crear nuevo producto
+    const li = document.createElement('li');
+    li.dataset.nombre = nombre;
+    li.dataset.precioUnitario = precio;
+    li.dataset.cantidad = 1;
+
+    li.innerHTML = `
+        ${nombre} <span class="cantidad">x1</span> - 
+        <span class="precio-total">${parseFloat(precio).toFixed(2)}€</span>
+    `;
+
+    // Crear desplegable al hacer click
+    li.addEventListener('click', () => {
+        // Evitar múltiples desplegables
+        if (li.querySelector('.editor')) return;
+
+        const editor = document.createElement('div');
+        editor.classList.add('editor');
+        editor.innerHTML = `
+            <input type="number" min="1" value="${li.dataset.cantidad}" />
+            <button class="guardar">Guardar</button>
+            <button class="eliminar">Eliminar</button>
+        `;
+
+        // Guardar cambios
+        editor.querySelector('.guardar').addEventListener('click', () => {
+            const nuevaCantidad = parseInt(editor.querySelector('input').value);
+            if (nuevaCantidad < 1) return;
+            li.dataset.cantidad = nuevaCantidad;
+            li.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
+            li.querySelector('.precio-total').textContent = `${(nuevaCantidad * precio).toFixed(2)}€`;
+            editor.remove();
+            actualizarTotal();
+        });
+
+        // Eliminar producto
+        editor.querySelector('.eliminar').addEventListener('click', () => {
+            li.remove();
+            actualizarTotal();
+        });
+
+        li.appendChild(editor);
+    });
+
+    pedidoLista.appendChild(li);
+    actualizarTotal();
+}
+
 
 // Funciones que realizan fetch de tipo GET
 
@@ -96,7 +163,7 @@ const mostrarCategorias = (categorias)=>{
     const container = document.getElementById("containerCategorias");
     const categoriasHTML = categorias.map(cat => {
         return `
-            <li href="#" categoria-datos="${cat.id}">${cat.nombre}</li>
+            <li href="#" data-categoria="${cat.id}">${cat.nombre}</li>
         `;
     }).join('');
     container.innerHTML = categoriasHTML;
@@ -106,17 +173,16 @@ const mostrarCategorias = (categorias)=>{
 
 // Funciones para mostrar los resultados en el DOM
 function mostrarSubCategorias(subcategorias) {
-    const container = document.getElementById('containerSubCategorias');
+    const container = document.getElementById('containerListadoDatos');
     container.innerHTML = ''; // Limpiar resultados previos
 
     if (subcategorias.length === 0) {
         container.innerHTML = 'No se encontraron subcategorías.';
         return;
     }
-
     const containerHTML = subcategorias.map(subcategoria => {
         return `
-            <div class="subCategoria">
+            <div class="subCategoria" data-subcategoria="${subcategoria.id}">
                 <img src="https://as2.ftcdn.net/v2/jpg/00/19/81/87/1000_F_19818729_Jo5Q24Kdc1Sx9GE4m3z1QGhX6qRNLoTV.jpg" alt="${subcategoria.nombre}"/>
                 <span>${subcategoria.nombre}</span>
             </div>
@@ -124,5 +190,33 @@ function mostrarSubCategorias(subcategorias) {
     }).join('');
 
     container.innerHTML = containerHTML;
+
+
+    // Event listener de Subcategorias para que muestren productos
+    Array.from(document.getElementsByClassName('subCategoria')).forEach(link => {
+        link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const id = e.currentTarget.dataset.subcategoria;
+
+            // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
+            const productos = await fetchProductos(id);
+            console.log('productos:', productos);
+            mostrarProductos(productos);
+        });
+    });
     
+}
+
+function actualizarTotal() {
+    const totalSpan = document.querySelector('.total span');
+    const pedidoLista = document.querySelector('.pedido ul');
+    let total = 0;
+
+    [...pedidoLista.children].forEach(li => {
+        const cantidad = parseInt(li.dataset.cantidad);
+        const precio = parseFloat(li.dataset.precioUnitario);
+        total += cantidad * precio;
+    });
+
+    totalSpan.textContent = `${total.toFixed(2)}€`;
 }

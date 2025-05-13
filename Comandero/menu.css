@@ -3,6 +3,7 @@
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
+    
   }
   
   body {
@@ -33,40 +34,45 @@
     color: white;
     padding: 20px;
     border-radius: 15px;
-    width: 220px;
+    min-width: 10%;
     height: 80vh;
-    /*mantener en la misma posicion*/
-    left: 1%;
-    transform: translateX(-1%);
-    position: fixed;
+    overflow-y: scroll;
+ 
   }
   
   .sidebar h2 {
     margin-bottom: 10px;
     border-bottom: 1px solid white;
     padding-bottom: 10px;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    text-align: center;
   }
   
   .sidebar ul {
     list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    justify-self: center;
   }
   
   .sidebar li {
     font-weight: bold;
     margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 2em;
+    border-bottom:1px solid #6f6f6f5e;
+    padding: 1rem;
   }
-    .sidebar li a {
-        color: white;
-        text-decoration: none;
-    }
 
  
   /* Subcategorias */
-  #containerSubCategorias {
+  #containerListadoDatos {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 20px;
+    width: 70%;
   }
   
   .subCategoria {
@@ -79,6 +85,7 @@
     display: flex;
     flex-direction: column;
     gap:1rem;
+    cursor: pointer;
   }
   
   .subCategoria img {
@@ -91,13 +98,27 @@
     font-size: 1.5em;
   }
   
-  .product p {
-    margin: 10px 0 5px;
+  .productos{
+    background-color: #e7e7e7;
+    border-radius: 15px;
+    width: 15rem;
+    height: 10rem;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap:20px;
+    cursor: pointer;
+    
+  }
+  .productos p {
+    font-size: 2em;
     font-weight: bold;
+    text-align: center;
   }
   
-  .product span {
-    font-size: 1.1rem;
+  .productos span {
+    font-size: 1.5rem;
     font-weight: bold;
   }
   
@@ -107,21 +128,19 @@
     color: white;
     padding: 20px;
     border-radius: 15px;
-    width: 220px;
+    width: 20%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 80vh;
-    
-    /*Maneter en la misma posicion*/
-    left: 99%;
-    transform: translateX(-99%);
-    position: fixed;
+
+    width: 20%;
+    overflow-y: scroll;
   }
   
   .pedido h2 {
     margin-bottom: 10px;
-    font-size: 1.3rem;
+    font-size: 2rem;
     border-bottom: 1px solid white;
     padding-bottom: 10px;
   }
@@ -129,13 +148,33 @@
   .pedido ul {
     list-style: none;
     flex-grow: 1;
+    min-height:60%;
+    max-height: 60%;
+    overflow-y: scroll;
   }
   
   .pedido li {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
-    font-size: 0.95rem;
+    font-size: 1.2rem;
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1px;
+    cursor: pointer;
+  }
+  .pedido li:nth-child(odd) {
+    background-color: rgb(68, 83, 130);
+  } 
+  .pedido li:nth-child(even) {
+    background-color: #855f49;
+  }
+  .pedido li span{
+    font-size: 1.2rem;
+    font-weight: bold;
   }
   
   .total {
@@ -149,31 +188,25 @@
     border-radius: 5px;
   }
 
-  .subtotal-btn {
-
-    font-weight: bold;
-    font-size: 1rem;
-    background-color: rgb(216, 216, 216);
+   .subtotal-btn {
     color: #2e3440;
+    background-color: rgb(216, 216, 216);
+    font-weight: bold;
+    margin: 10px 0;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
-    padding: 10px 45px;
-    margin: 10px;
+    padding: 10px 56px;
     
   }
-  
-  .cobrar-btn {
 
-    font-weight: bold;
-    font-size: 1rem;
-    background-color: rgb(216, 216, 216);
+  .cobrar-btn {
     color: #2e3440;
+    background-color: rgb(216, 216, 216);
+    font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    padding: 10px 55px;
-    
+    padding: 10px 62px;
   }
   
 
@@ -210,7 +243,7 @@
   
   .Ptotal {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; 
     background-color: #c76d3a;
     color: white;
     padding: 10px;
@@ -249,4 +282,29 @@
     margin-left: 80px;
     
 }
-  
+
+@media screen and (max-width:1800px) {
+    #containerListadoDatos {
+      grid-template-columns: repeat(3, 1fr);
+    } 
+}
+@media screen and (max-width:1250px) {
+    #containerListadoDatos {
+      grid-template-columns: repeat(2, 1fr);
+    } 
+}
+@media screen and (max-width:1024px) {
+    #containerListadoDatos {
+      grid-template-columns: repeat(1, 1fr);
+    } 
+}
+
+.editor {
+  margin-top: 5px;
+}
+.editor input {
+  width: 50px;
+}
+.editor button {
+  margin-left: 5px;
+}
