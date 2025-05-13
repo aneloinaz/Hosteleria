@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         //depurar
         console.log('Subcategorías de la primera categoría:', subcategorias);
     }
-    // Event listener de categorias para que muestren
-    document.querySelectorAll('[data-categoria-id]').forEach(link => {
+    // Event listener de categorias para que muestren Subcategorias
+    document.querySelectorAll('[categiria-datos]').forEach(link => {
         link.addEventListener('click', async (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             const id = e.target.dataset.categoriaId;
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
@@ -76,21 +76,21 @@ async function fetchSubCategorias(idCategoria) {
         console.error('Error cargando subcategorías');
         return [];
     }
-} 
+}
 
 async function fetchProductos(idSubCategoria) {
     try {
         // Cambié el parámetro de URL para obtener productos según subcategoría
         const res = await fetch(`http://192.168.24.96:3000/productos?subcategoria_id=${idSubCategoria}`);
         return await res.json();
-    } catch (e) { 
+    } catch (e) {
         console.error('Error cargando productos');
         return [];
     }
 }
 
 //GENERADORES, PARA QUE SEA DINAMICO
- 
+
 //GENERA LA LISTA DE CATEGORIAS
 const mostrarCategorias = (categorias)=>{
     const container = document.getElementById("containerCategorias");
@@ -114,11 +114,15 @@ function mostrarSubCategorias(subcategorias) {
         return;
     }
 
-    subcategorias.forEach(subcategoria => {
-        const div = document.createElement('div');
-        div.textContent = subcategoria.nombre;
-        div.dataset.subcategoriaId = subcategoria.id;
-        div.classList.add('subcategoria');
-        container.appendChild(div);
-    });
+    const containerHTML = subcategorias.map(subcategoria => {
+        return `
+            <div class="subCategoria">
+                <img src="https://as2.ftcdn.net/v2/jpg/00/19/81/87/1000_F_19818729_Jo5Q24Kdc1Sx9GE4m3z1QGhX6qRNLoTV.jpg" alt="${subcategoria.nombre}"/>
+                <span>${subcategoria.nombre}</span>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = containerHTML;
+    
 }

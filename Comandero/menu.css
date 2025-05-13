@@ -23,6 +23,7 @@
   
   .main {
     display: flex;
+    justify-content: center;
     gap: 20px;
   }
   
@@ -32,7 +33,12 @@
     color: white;
     padding: 20px;
     border-radius: 15px;
-    min-width: 150px;
+    width: 220px;
+    height: 80vh;
+    /*mantener en la misma posicion*/
+    left: 1%;
+    transform: translateX(-1%);
+    position: fixed;
   }
   
   .sidebar h2 {
@@ -56,12 +62,11 @@
     }
 
  
-  /* Productos */
+  /* Subcategorias */
   #containerSubCategorias {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
-    flex-grow: 1;
   }
   
   .subCategoria {
@@ -69,13 +74,21 @@
     border-radius: 15px;
     text-align: center;
     padding: 10px;
+    width: 15rem;
+    height: 17rem;
+    display: flex;
+    flex-direction: column;
+    gap:1rem;
   }
   
   .subCategoria img {
     width: 100%;
     border-radius: 10px;
-    max-height: 120px;
+    max-height: 200px;
     object-fit: cover;
+  }
+  .subCategoria span{
+    font-size: 1.5em;
   }
   
   .product p {
@@ -94,10 +107,16 @@
     color: white;
     padding: 20px;
     border-radius: 15px;
-    min-width: 220px;
+    width: 220px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 80vh;
+    
+    /*Maneter en la misma posicion*/
+    left: 99%;
+    transform: translateX(-99%);
+    position: fixed;
   }
   
   .pedido h2 {
@@ -128,6 +147,20 @@
     font-weight: bold;
     margin: 10px 0;
     border-radius: 5px;
+  }
+
+  .subtotal-btn {
+
+    font-weight: bold;
+    font-size: 1rem;
+    background-color: rgb(216, 216, 216);
+    color: #2e3440;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px 45px;
+    margin: 10px;
+    
   }
   
   .cobrar-btn {
