@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket de compra</title>
+    <title>Subtotal Ticket</title>
     <link rel="stylesheet" href="factura.css">
 </head>
 <body>
@@ -15,9 +15,9 @@
                 <div class="datosEmpresa">Etarte bidea<br>9<br>Zubieta-Usurbil<br>20170<br>943364600</div>
             
                 <div class="section bold">FACTURA SIMPLIFICADA</div>
-            
+                 <!-- Aquí se mostrará la informacion del pedido (funcion que tiene que hacer YAhir ) -->
                 <div class="section">
-                  <script src="ticket.js"></script>
+                  <script src="tick"></script>
                 </div>
             
                 <div class="total">
@@ -27,14 +27,10 @@
                     </div>
                 </div>
             
-                <div class="iva">
-                  <div>Impuestos incluidos</div>
-                  <div>IVA 10% - Base: <span id="base-iva"></span> Cuota <span id="cuota-iva"></span></div>
-                </div>
               
              
         </div>
-        <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir Ticket</button> 
+        <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir</button> 
     </main>
     <script src="cobrar.js"></script>
     <script src="factura.js"></script>
