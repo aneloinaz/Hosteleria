@@ -33,3 +33,20 @@ function calcularMediaxComensal() {
     document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
 }
 
+function mostrarQR() {
+    // Puedes personalizar el texto del QR, por ejemplo, el total de la factura
+    const total = document.getElementById('total').textContent;
+    const textoQR = `Total factura: ${total} €`;
+
+    // Construye la URL de la API de goQR
+    const urlQR = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(textoQR)}&size=150x150`;
+
+    // Crea o actualiza la imagen del QR en el HTML
+    let imgQR = document.getElementById('imgQR');
+    if (!imgQR) {
+        imgQR = document.createElement('img');
+        imgQR.id = 'imgQR';
+        document.body.appendChild(imgQR); // O en el contenedor que prefieras
+    }
+    imgQR.src = urlQR;
+}
