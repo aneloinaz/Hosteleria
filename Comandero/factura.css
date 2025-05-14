@@ -1,4 +1,5 @@
 
+/*estilo de la facura y el subtotal*/
 body {
   font-family: monospace;
   background: #f4f4f4;
@@ -43,7 +44,12 @@ body {
   border-top: 1px dashed #000;
   padding-top: 5px;
 }
+/*Estilo para la comada*/
 
+
+
+
+/*Resposive*/
 @media (max-width: 768px){
   #ticket {
     width: 100%;

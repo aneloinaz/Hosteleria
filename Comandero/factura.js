@@ -34,7 +34,7 @@ function calcularMediaxComensal() {
 }
 
 function mostrarQR() {
-    // Puedes personalizar el texto del QR, por ejemplo, el total de la factura
+    // Puedes personalizar el texto del QR 
     const total = document.getElementById('total').textContent;
     const textoQR = `Total factura: ${total} €`;
 

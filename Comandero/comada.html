@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMANDA</title>
+    <link rel="stylesheet" href="factura.css">
+</head>
+<body>
+    <main>
+        
+        <div id="ticket">
+            <!-- Aquí se mostrará la comada-->
+                <div class="empresa">SALA 1</div> <!--esto lo tiene que coger del localStorage--> 
+                <div class="datosEmpresa">COMENSALES :</div><!--esto lo tiene que coger del localStorage--> 
+            
+                <div class="section bold">SUBTOTAL</div>
+                 <!-- Aquí se mostrará la informacion de la mesa ) -->
+                <div class="section">
+                   <!-- Aquí se mostrará la informacion del pedido) -->  
+                  <script src="tick"></script>
+                </div>
+            </div>
+        <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir</button> 
+    </main>
+    <script src="cobrar.js"></script>
+    <script src="factura.js"></script>
+    
+</body>
+</html>
