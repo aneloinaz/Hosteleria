@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pedido Mesa 3</title>
+  <link rel="stylesheet" href="menu.css" />
+</head>
+<body>
+  <div class="container">
+    <h1 class="mesa-title">MESA</h1>
+    <div class="main">
+      <!-- Categorías -->
+      <div class="sidebar">
+        <h2>CATEGORIAS</h2>
+        <ul id="containerCategorias">
+          <!--Es dinamico-->
+          <!--Se van a generar desde el Js las etiquetas, dependiendo a las categorias que encuentre-->
+          <!--<li><a href="categorias.html" categoria-datos="1">Ejemplo</a></li>-->
+          <!---->
+        </ul>
+      </div>
+
+      
+
+      <div id="containerListadoDatos">
+        <!--SE GENERA DE FORMA DINAMICA LAS SUB CATEGORIAS-->
+        
+      </div>
+
+      <!-- Pedido -->
+      <div class="pedido">
+        <h2>PEDIDO</h2>
+        <ul class="pedido-ul">
+         <!--aqui deben aparecer los productos añadididos-->
+        </ul>
+        <div class="total">
+          <p>TOTAL:</p>
+            <span></span>
+        </div>
+
+        <a href="subtotal.html"><button class="subtotal-btn">SUBTOTAL</button></a>
+        <a href="cobrar.html"><button class="cobrar-btn">COBRAR</button></a>
+        
+      </div>
+
+      <!-- Productos -->
+       <script defer src="menu.js"></script>
+       <script defer src="filtro.js"></script>
+    </div>
+  </div>
+</body>
+</html>
