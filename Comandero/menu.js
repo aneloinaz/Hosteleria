@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Recuperar datos del local storage al cargar la página
+    const pedidoGuardado = localStorage.getItem('pedido');
+    if (pedidoGuardado) {
+        const pedido = JSON.parse(pedidoGuardado);
+        pedido.forEach(item => {
+            agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id);
+        });
+    }
     const categorias = await fetchCategorias();
     
     if (categorias.length > 0) {
@@ -28,10 +36,9 @@ function mostrarProductos(productos) {
     container.innerHTML = ''; // Limpiar resultados previos
 
     if (productos.length === 0) {
-        container.innerHTML = 'No se encontraron productos.';
+        container.innerHTML = 'No se encontraron productos.';    
         return;
     }
-
     const containerHTML = productos.map(producto => {
         return `
             <div class="productos" data-producto="${producto.id}">
@@ -39,45 +46,48 @@ function mostrarProductos(productos) {
                 <span>${producto.precio}€</span>
             </div>
             `;
-        }).join('');
+        }).join('');   
 
     container.innerHTML = containerHTML;
 
     document.querySelectorAll('.productos').forEach(productoEl => {
         productoEl.addEventListener('click', () => {
+            const id = productoEl.dataset.producto;
             const nombre = productoEl.querySelector('p').textContent;
             const precio = productoEl.querySelector('span').textContent.replace('€', '');
-            agregarProductoAlPedido(nombre, precio);
+            agregarProductoAlPedido(nombre, precio,1, id);
         });
     });
 }
 
 
-function agregarProductoAlPedido(nombre, precio) {
+function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
     const pedidoLista = document.querySelector('.pedido ul');
     const totalSpan = document.querySelector('.total span');
 
     // Verifica si el producto ya está en la lista
-    let itemExistente = [...pedidoLista.children].find(li => li.dataset.nombre === nombre);
+    let itemExistente = [...pedidoLista.children].find(li => li.dataset.id === id);
 
     if (itemExistente) {
-        let cantidad = parseInt(itemExistente.dataset.cantidad) + 1;
-        itemExistente.dataset.cantidad = cantidad;
-        itemExistente.querySelector('.cantidad').textContent = `x${cantidad}`;
-        itemExistente.querySelector('.precio-total').textContent = `${(precio * cantidad).toFixed(2)}€`;
+        let nuevaCantidad = parseInt(itemExistente.dataset.cantidad) + cantidad;
+        itemExistente.dataset.cantidad = nuevaCantidad;
+        itemExistente.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
+        itemExistente.querySelector('.precio-total').textContent = `${(precio * nuevaCantidad).toFixed(2)}€`;
         actualizarTotal();
+        guardarPedidoEnLocalStorage();
         return;
     }
 
     // Crear nuevo producto
     const li = document.createElement('li');
+    li.dataset.id = id;
     li.dataset.nombre = nombre;
     li.dataset.precioUnitario = precio;
-    li.dataset.cantidad = 1;
+    li.dataset.cantidad = cantidad;
 
     li.innerHTML = `
-        ${nombre} <span class="cantidad">x1</span> - 
-        <span class="precio-total">${parseFloat(precio).toFixed(2)}€</span>
+        ${nombre} <span class="cantidad">x${cantidad}</span> - 
+        <span class="precio-total">${(precio * cantidad).toFixed(2)}€</span>
     `;
 
     // Crear desplegable al hacer click
@@ -102,12 +112,14 @@ function agregarProductoAlPedido(nombre, precio) {
             li.querySelector('.precio-total').textContent = `${(nuevaCantidad * precio).toFixed(2)}€`;
             editor.remove();
             actualizarTotal();
+            guardarPedidoEnLocalStorage();
         });
 
         // Eliminar producto
         editor.querySelector('.eliminar').addEventListener('click', () => {
             li.remove();
             actualizarTotal();
+            guardarPedidoEnLocalStorage();
         });
 
         li.appendChild(editor);
@@ -115,6 +127,20 @@ function agregarProductoAlPedido(nombre, precio) {
 
     pedidoLista.appendChild(li);
     actualizarTotal();
+    guardarPedidoEnLocalStorage();
+}
+
+function guardarPedidoEnLocalStorage() {
+    const pedidoLista = document.querySelector('.pedido ul');
+    const pedido = [...pedidoLista.children].map(li => {
+        return {
+            id: li.dataset.id,
+            nombre: li.dataset.nombre,
+            precio: parseFloat(li.dataset.precioUnitario),
+            cantidad: parseInt(li.dataset.cantidad)
+        };
+    });
+    localStorage.setItem('pedido', JSON.stringify(pedido));
 }
 
 
