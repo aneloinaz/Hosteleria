@@ -111,7 +111,7 @@
     background-color: #e7e7e7;
     border-radius: 15px;
     width: 15rem;
-    height: 10rem;
+    min-height: 10rem;
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -119,12 +119,13 @@
     gap:20px;
     cursor: pointer;
     user-select: none;
-    
+    padding: 2rem;
   }
   .productos p {
     font-size: 2em;
     font-weight: bold;
     text-align: center;
+    word-wrap: break-word;
   }
   
   .productos span {
@@ -145,7 +146,25 @@
     overflow-y: scroll;
     position: fixed;
     right: 0;
+    gap: 1rem;
   ;
+  }
+  .pedido-header{
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+  }
+  #marchar{
+    background-color: #51ad6a;
+   min-width: 5rem;
+   max-width: 5.5rem;
+   height: 3rem;
+   border-radius: 10px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   font-weight: 700;
+   cursor: pointer;
   }
   
   .pedido h2 {
@@ -314,6 +333,8 @@
 .editor input {
   width: 5rem;
   height: 3rem;
+  border-radius: 1rem;
+  padding: 1rem;
 }
 .editor button {
   margin-left: 5px;
