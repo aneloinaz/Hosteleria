@@ -25,6 +25,7 @@ body {
   text-align: center;
   margin-top: auto;
   padding: auto;
+
 }
 
 .bold {
@@ -39,9 +40,9 @@ body {
   padding: 4px 0;
 }
 
-.total, .iva {
+.total, .iva,.infoMesa{
   margin-top: 10px;
-  border-top: 1px dashed #000;
+  border-top: 1px dashed #0a0a0a;
   padding-top: 5px;
 }
 /*Estilo para la comada*/
