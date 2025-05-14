@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const telefono = document.getElementById("telefono").value;
       const email = document.getElementById("email").value;
       const personas = document.getElementById("personas").value;
+      const comentario = document.getElementById("comentarios").value;
   
       // Guardar en localStorage para usarlos luego si es necesario
       localStorage.setItem("fecha", fecha);
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("telefono", telefono);
       localStorage.setItem("email", email);
       localStorage.setItem("personas", personas);
+      localStorage.setItem("comentarios", comentario);
       
       fetch("Api", {
         method: "POST",
@@ -45,12 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         body: JSON.stringify({
           fecha,
-          hora,
-          nombre,
-          apellido,
-          telefono,
-          email,
-          personas
+          //hora,
+          //nombre,
+          //apellido,
+          //telefono,
+          //email,
+          personas,
+          //comentario
         })
       })
       .then(response => {

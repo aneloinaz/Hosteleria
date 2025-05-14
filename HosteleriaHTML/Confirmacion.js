@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const apellido = localStorage.getItem("apellido");
     const telefono = localStorage.getItem("telefono");
     const email = localStorage.getItem("email");
+    const comentario = localStorage.getItem("comentarios")
   
     // Insertar datos en los párrafos del resumen
     const resumen = document.querySelector(".resumen");
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       datos[4].innerHTML = `<strong>APELLIDO:</strong> ${apellido}`;
       datos[5].innerHTML = `<strong>TELÉFONO:</strong> ${telefono}`;
       datos[6].innerHTML = `<strong>EMAIL:</strong> ${email}`;
+      datos[7].innerHTML = `<strong>COMENTARIO:</strong> ${comentario}`;
     }
   
     // Evento al confirmar reserva
