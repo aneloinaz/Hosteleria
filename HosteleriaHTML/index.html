@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="container">
+    <h1>RESERVE EN LHUSURBIL</h1>
+    <p class="direccion">De Etarte Bidea, 20160 Zubieta, Gipuzkoa</p>
+ 
+    <form action="BuscarMesa" method="POST">
+      <div class="personas">
+       
+        <label for="personas">👤 N° DE PERSONAS:</label><br>
+        <input type="number" id="personas" name="personas" min="1" max="8"  required><br><br>
+        <label for="fecha">Fecha:</label><br>
+        <input type="date" id="fecha" name="fecha" required><br><br>
+        <!--<label for="hora">Hora:</label><br>
+        <input type="time" id="hora" name="hora" required><br><br>-->
+        <button type="submit" class="continuar">CONTINUAR</button>
+        </div>
+    </form>
+    <p class="contacto">Llámenos al <strong style="color:#003366;">943364600</strong> si son más de 8 personas o si tiene cualquier duda.</p>
+</div>
+
+  <script src="index.js"></script>
+</body>
+</html>

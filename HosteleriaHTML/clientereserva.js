@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("personas", personas);
       localStorage.setItem("comentarios", comentario);
       
-      fetch("Api", {
+      fetch("https://apiostalaritza.lhusurbil.eus/swagger/v1/swagger.json", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
