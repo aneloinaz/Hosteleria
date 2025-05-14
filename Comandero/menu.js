@@ -7,16 +7,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id);
         });
     }
-    const categorias = await fetchCategorias();
+    const categoriasJson = await fetchCategorias();
     
-    if (categorias.length > 0) {
-        const primeraId = categorias[0].id;
+    if (categoriasJson.categorias.length > 0) {
+        const primeraId = categoriasJson.categorias[0].id;
 
-        const subcategorias = await fetchSubCategorias(primeraId);
+        const subcategoriasJson = await fetchSubCategorias(primeraId);
 
         //mostrar lista de categorias al cargar
-        mostrarCategorias(categorias);
-        mostrarSubCategorias(subcategorias);
+        mostrarCategorias(categoriasJson.categorias);
+        mostrarSubCategorias(subcategoriasJson.categorias);
     }
     // Event listener de categorias para que muestren Subcategorias
     document.querySelectorAll('#containerCategorias li').forEach(link => {
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
             const subcategorias = await fetchSubCategorias(id);
-            mostrarSubCategorias(subcategorias);
+            mostrarSubCategorias(subcategorias.categorias);
         });
     });
 });
@@ -91,9 +91,11 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
     `;
 
     // Crear desplegable al hacer click
-    li.addEventListener('click', () => {
+    li.addEventListener('click', (e) => {
         // Evitar múltiples desplegables
-        if (li.querySelector('.editor')) return;
+        if (li.querySelector('.editor')) {
+            return;
+        }
 
         const editor = document.createElement('div');
         editor.classList.add('editor');
@@ -103,6 +105,11 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
             <button class="eliminar">Eliminar</button>
         `;
 
+        // Evitar que el editor desaparezca al hacer clic dentro de él
+        editor.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
         // Guardar cambios
         editor.querySelector('.guardar').addEventListener('click', () => {
             const nuevaCantidad = parseInt(editor.querySelector('input').value);
@@ -110,7 +117,7 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
             li.dataset.cantidad = nuevaCantidad;
             li.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
             li.querySelector('.precio-total').textContent = `${(nuevaCantidad * precio).toFixed(2)}€`;
-            editor.remove();
+            editor.remove(); // Eliminar el editor al guardar
             actualizarTotal();
             guardarPedidoEnLocalStorage();
         });
@@ -148,7 +155,7 @@ function guardarPedidoEnLocalStorage() {
 
 async function fetchCategorias() {
     try {
-        const res = await fetch('http://192.168.24.96:3000/categorias');
+        const res = await fetch('https://apiostalaritza.lhusurbil.eus/GetCategorias');
         return await res.json();
     } catch (e) {
         console.error('Error cargando categorías');
@@ -160,7 +167,7 @@ async function fetchCategorias() {
 async function fetchSubCategorias(idCategoria) {
     try {
         // Aquí se ajusta la URL para cada categoria_id
-        const res = await fetch(`http://192.168.24.96:3000/subcategorias?categoria_id=${idCategoria}`);
+        const res = await fetch(`https://apiostalaritza.lhusurbil.eus/GetSubCategorias?idCategoria=${idCategoria}`);
         return await res.json();
     } catch (e) {
         console.error('Error cargando subcategorías');
@@ -171,7 +178,7 @@ async function fetchSubCategorias(idCategoria) {
 async function fetchProductos(idSubCategoria) {
     try {
         // Cambié el parámetro de URL para obtener productos según subcategoría
-        const res = await fetch(`http://192.168.24.96:3000/productos?subcategoria_id=${idSubCategoria}`);
+        const res = await fetch(`https://apiostalaritza.lhusurbil.eus/GetProductos?idCategoria=${idSubCategoria}`);
         return await res.json();
     } catch (e) {
         console.error('Error cargando productos');
@@ -222,9 +229,9 @@ function mostrarSubCategorias(subcategorias) {
             const id = e.currentTarget.dataset.subcategoria;
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
-            const productos = await fetchProductos(id);
-            console.log('productos:', productos);
-            mostrarProductos(productos);
+            const productosJson = await fetchProductos(id);
+            console.log('productos:', productosJson);
+            mostrarProductos(productosJson.productos);
         });
     });
     
