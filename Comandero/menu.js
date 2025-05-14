@@ -31,6 +31,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+if(!datosMesa){
+    alert('No se han ecnontrado datos de la mesa');
+    window.location.href = 'index.html';
+
+}
+const pedidoGuardado = localStorage.getItem('pedido');
+if (pedidoGuardado) {
+    const pedido = JSON.parse(pedidoGuardado);
+    pedido.forEach(item => {
+        agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id);
+    });
+}
+
+
+const marchas = {
+    mesa : datosMesa.mesa,
+    marchados: [],
+
+}
+
 function mostrarProductos(productos) {
     const container = document.getElementById('containerListadoDatos');
     container.innerHTML = ''; // Limpiar resultados previos
