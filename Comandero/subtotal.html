@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtotal Ticket</title>
+    <link rel="stylesheet" href="factura.css">
+</head>
+<body>
+    <main>
+        
+        <div id="ticket">
+            <!-- Aquí se mostrará el ticket de compra -->
+                <div class="empresa">CIFP Usurbil LHII</div>
+                <div class="datosEmpresa">Etarte bidea<br>9<br>Zubieta-Usurbil<br>20170<br>943364600</div>
+            
+                <div class="section bold">FACTURA SIMPLIFICADA</div>
+                 <!-- Aquí se mostrará la informacion del pedido (funcion que tiene que hacer YAhir ) -->
+                <div class="section">
+                  <script src="tick"></script>
+                </div>
+            
+                <div class="total">
+                    <div class="section">TOTAL</div>
+                    <div class="section" id="total">
+                       
+                    </div>
+                </div>
+            
+              
+             
+        </div>
+        <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir</button> 
+    </main>
+    <script src="cobrar.js"></script>
+    <script src="factura.js"></script>
+    
+</body>
+</html>
