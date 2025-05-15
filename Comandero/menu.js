@@ -29,6 +29,47 @@ document.addEventListener('DOMContentLoaded', async () => {
             mostrarSubCategorias(subcategorias.categorias);
         });
     });
+
+    const btnEnviarCocina=document.getElementById('boton-enviar-cocina');
+    if(btnEnviarCocina){
+        btnEnviarCocina.addEventListener('click',()=>{
+            if(confirm('¿Confirmas que quieres enviar la comanda a cocina?')){
+                let comandasPendientes=JSON.parse(localStorage.getItem('comandasPendientes') || '[]');
+
+                const pedidoLista=document.querySelector('.pedido ul');
+                const pedido=[];
+                pedidoLista.querySelectorAll('li').forEach(li => {
+                    pedido.push({
+                        id: li.dataset.id,
+                        nombre: li.dataset.nombre,
+                        precio: parseFloat(li.dataset.precioUnitario),
+                        cantidad: parseInt(li.dataset.cantidad)
+                    });
+                });
+
+                if(pedido.length===0){
+                    alert('El pedido está vacio');
+                    return;
+                }
+
+                const nuevaComanda={
+                    id: Date.now(),
+                    fecha: new Date().toISOString(),
+                    pedido: pedido,
+                    cobrada: false
+                };
+
+                comandasPendientes.push(nuevaComanda);
+                localStorage.setItem('comandasPendientes', JSON.stringify(comandasPendientes));
+
+                pedidoLista.innerHTML='';
+                actualizarTotal();
+                guardarPedidoEnLocalStorage();
+
+                alert('Comanda enviada a cocina');
+            }
+        });
+    }
 });
 
 function mostrarProductos(productos) {
@@ -261,14 +302,14 @@ document.addEventListener('DOMContentLoaded',()=>{
             alert(`Cobro con ${tipo} realizado`);
             localStorage.removeItem('pedido');
             setTimeout(()=>{
-                window.location.href='menuJavi.html';
+                window.location.href='menu.html';
             }, 2000);
         };
 
         btnEfectivo.addEventListener('click', ()=>finalizarPago('EFECTIVO'));
         btnTarjeta.addEventListener('click',()=>finalizarPago('TARJETA'));
         btnCancelar.addEventListener('click',()=>{
-            window.location.href='menuJavi.html';
+            window.location.href='menu.html';
         });
     }
 });

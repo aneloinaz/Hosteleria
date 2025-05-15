@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.getElementById('volver-btn').addEventListener('click',()=>{
-    window.location.href='menuJavi.html';
+    window.location.href='menu.html';
 });
 
 document.getElementById('cobrar-btn').addEventListener('click',()=>{
-    window.location.href='cobrarJavi.html';
+    window.location.href='cobrar.html';
 });
