@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log("Cargado el DOM en peidido.js");
+    console.log("Cargado el DOM en pedido.js");
 
 
     // Recuperar datos del local storage al cargar la página

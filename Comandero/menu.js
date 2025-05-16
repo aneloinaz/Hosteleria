@@ -45,12 +45,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const btnEspera = document.getElementById('boton-esperar');
-    if (btnEspera) {
-        btnEspera.addEventListener('click', () => {
+    const btnEnviar = document.getElementById('boton-esperar');
+    if (btnEnviar) {
+        btnEnviar.addEventListener('click', async () => {
             // Recupera el id de la mesa seleccionada
             const mesaId = localStorage.getItem('mesaSeleccionada');
-            // Decide a qué sala volver según el número de mesa
+            if (!mesaId) {
+                alert('No se ha seleccionado ninguna mesa.');
+                return;
+            }
+
+            // Recupera el pedido de la mesa
+            const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+            if (!pedidoGuardado) {
+                alert('No hay productos en el pedido.');
+                return;
+            }
+            const pedido = JSON.parse(pedidoGuardado);
+
+            // 1. Crear la comanda
+            const idMesa = localStorage.getItem('mesaSeleccionada');
+            console.log('idMesa que se envía:', idMesa);
+            const url = `https://apiostalaritza.lhusurbil.eus/PostCrearComanda?idMesa=${idMesa}`;
+            const res = await fetch(url, { method: 'POST' });
+            const data = await res.json();
+            console.log('Respuesta JSON de PostCrearComanda:', data); // <-- Pega aquí el resultado
+            const idComanda = data.idComanda || data.IdComanda || data.id || data.comandaId;
+            console.log('ID Comanda:', idComanda);
+            if (!idComanda) {
+                alert('No se pudo crear la comanda.');
+                return;
+            }
+
+            console.log('Respuesta JSON de PostCrearComanda:', data);
+
+            // 2. Insertar detalles de la comanda
+            for (const producto of pedido) {
+                console.log('Insertando detalle:', {
+                    idComanda,
+                    idProducto: producto.id,
+                    cantidad: producto.cantidad
+                });
+                const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda?idComanda=${encodeURIComponent(idComanda)}&idProducto=${encodeURIComponent(producto.id)}&cantidad=${encodeURIComponent(producto.cantidad)}`;
+                const resDetalle = await fetch(urlDetalle, {
+                    method: 'POST'
+                });
+                const dataDetalle = await resDetalle.json();
+                console.log('Respuesta detalle:', dataDetalle);
+                if (!resDetalle.ok || dataDetalle.ok === false) {
+                    alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+                    return;
+                }
+            }
+
+            alert('Comanda enviada correctamente');
+            // Limpia el pedido y vuelve a la sala
+            localStorage.removeItem(`pedido_mesa_${mesaId}`);
             if (mesaId === '1' || mesaId === '2') {
                 window.location.href = 'salas1.html';
             } else {
@@ -157,6 +207,9 @@ function mostrarProductos(productos) {
     const containerHTML = productos.map(producto => {
         return `
             <div class="productos" data-producto="${producto.id} data-numOrden=${producto.numOrden}">
+                <p>${producto.nombre}</p>
+                <span>${producto.precio}€</span>
+            </div>
                 <p>${producto.nombre}</p>
                 <span>${producto.precio}€</span>
             </div>
