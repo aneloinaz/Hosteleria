@@ -61,6 +61,20 @@ h1 {
     flex-wrap: wrap;
 }
 
+.boton-aceptar {
+    background-color: #4cc29f;
+    color: rgb(0, 0, 0);
+    padding: 0px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-align: center;
+    width: 100px;   
+    height: 40px;
+    margin-top: 50px;
+   
+
+}
 .boton {
     width: 200px;
     height: 260px;
