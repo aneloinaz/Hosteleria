@@ -98,7 +98,7 @@ h1 {
 }
 
 .n4 {
-  top: 130px;
+  top: 630px;
   left: 450px;
 }
 
@@ -108,8 +108,15 @@ h1 {
 }
 
 .n6 {
-  top: 630px;
+  top: 130px;
   left: 450px;
+}
+
+.mesa:hover {
+  background-color: #444645;
+  color: #000000;
+  border: 4px solid #000000;
+  transition: all 0.3s ease;
 }
 
 
