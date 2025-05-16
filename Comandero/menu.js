@@ -153,5 +153,3 @@ function mostrarProductos(productos) {
     container.innerHTML = containerHTML;
     handlerProductos();
 }
-
-

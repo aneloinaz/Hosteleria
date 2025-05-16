@@ -11,15 +11,6 @@ document.addEventListener('DOMContentLoaded',async function(){
             agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id, item.numOrden);
         });
     }
-
-    let contMarchas = 1;
-    const btnMarchar = document.getElementById('marchar');
-    btnMarchar.innerText = `Marchar Nº ${contMarchas} `;
-
-    // Event listener para marchar comanda
-    btnMarchar.addEventListener('click', () => { 
-        marcharComanda();
-    });
 });
 
 export function handlerProductos(){
@@ -143,24 +134,3 @@ function guardarPedidoEnLocalStorage() {
     localStorage.setItem('pedido', JSON.stringify(pedido));
 }
 
-//marchar comanda
-function marcharComanda() {
-    const pedidoLista = JSON.parse(localStorage.getItem('pedido'));
-    if (!pedidoLista) return;
-
-    const marchar = pedidoLista.filter(item => 
-        item.orden == 1 && item.estado == 'false'
-    ).map(item => {
-        return {
-            id: item.id,
-            nombre: item.nombre,
-            cantidad: parseInt(item.cantidad),
-            };
-         });
-    // Aquí puedes realizar alguna acción con los elementos filtrados
-    console.log('Productos marchados:', marchar);
-    const listaMarchas = JSON.parse(localStorage.getItem('marchas'));
-    listaMarchas.marchados.push(marchar);
-    localStorage.setItem('marchas', JSON.stringify(listaMarchas));
-    return marchar;
-}
