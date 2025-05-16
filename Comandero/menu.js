@@ -1,39 +1,26 @@
-// meter manualmente la mesa
-    //const mesa = 1;
-    //const comensales = 4;
-    //const hora = new Date().toLocaleTimeString();
-    //const fecha = new Date().toLocaleDateString();
-    // Guardar datos de la mesa en el local storage
-    //localStorage.setItem('datosMesa', JSON.stringify({ mesa, comensales, hora, fecha }));
+
+import { handlerProductos } from "./pedido.js";
+
 document.addEventListener('DOMContentLoaded', async () => {
+    // meter manualmente la mesa
+    const mesa = 1;
+    const comensales = 4;
+    const hora = new Date().toLocaleTimeString();
+    const fecha = new Date().toLocaleDateString();
+    // Guardar datos de la mesa en el local storage
+    localStorage.setItem('datosMesa', JSON.stringify({ mesa, comensales, hora, fecha }));
+
+
+
+
     const datosMesa = JSON.parse(localStorage.getItem('datosMesa'));
     
     
     if(!datosMesa){
         alert('No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.');
-      
+        window.location.href = 'index.html';
     }
-    // Recuperar datos del local storage al cargar la página
-    const pedidoGuardado = localStorage.getItem('pedido');
-
-
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        pedido.forEach(item => {
-            agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id);
-        });
-    }
-
-
-    //marchaas
-    const marchas = {
-        mesa : datosMesa.mesa,
-        marchados : [],
-        
-    }
-
-    localStorage.setItem('marchas', JSON.stringify(marchas));
-
+    
     //
 
     const categoriasJson = await fetchCategorias();
@@ -64,168 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         marcharComanda();
     });
 });
-
-function mostrarProductos(productos) {
-    const container = document.getElementById('containerListadoDatos');
-    container.innerHTML = ''; // Limpiar resultados previos
-
-    if (productos.length === 0) {
-        container.innerHTML = 'No se encontraron productos.';    
-        return;
-    }
-    const containerHTML = productos.map(producto => {
-        return `
-            <div class="productos" data-producto="${producto.id}">
-                <p>${producto.nombre}</p>
-                <span>${producto.precio}€</span>
-            </div>
-            `;
-        }).join('');   
-
-    container.innerHTML = containerHTML;
-
-    document.querySelectorAll('.productos').forEach(productoEl => {
-        productoEl.addEventListener('click', () => {
-            const id = productoEl.dataset.producto;
-            const nombre = productoEl.querySelector('p').textContent;
-            const precio = productoEl.querySelector('span').textContent.replace('€', '');
-            agregarProductoAlPedido(nombre, precio,1, id);
-        });
-    });
-}
-
-
-function enviarComanda(){
-    const pedidoLista = JSON.parse(localStorage.getItem('pedido'));
-    if (!pedidoLista) return;
-
-    const comanda = pedidoLista.filter(item => 
-        item.orden == 1 && item.estado == 'false'
-    ).map(item => {
-        return {
-            id: item.id,
-            nombre: item.nombre,
-            cantidad: parseInt(item.cantidad),
-            };
-         });
-    // Aquí puedes realizar alguna acción con los elementos filtrados
-    console.log('Comanda enviada:', comanda);
-    window.location.href = 'sala1.html';
-}
-
-
-function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
-    const pedidoLista = document.querySelector('.pedido ul');
-
-    // Verifica si el producto ya está en la lista
-    let itemExistente = [...pedidoLista.children].find(li => li.dataset.id === id);
-
-    if (itemExistente) {
-        let nuevaCantidad = parseInt(itemExistente.dataset.cantidad) + cantidad;
-        itemExistente.dataset.cantidad = nuevaCantidad;
-        itemExistente.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
-        itemExistente.querySelector('.precio-total').textContent = `${(precio * nuevaCantidad).toFixed(2)}€`;
-        actualizarTotal();
-        guardarPedidoEnLocalStorage();
-        return;
-    }
-
-    // Crear nuevo producto
-    const li = document.createElement('li');
-    li.dataset.id = id;
-    li.dataset.nombre = nombre;
-    li.dataset.precioUnitario = precio;
-    li.dataset.cantidad = cantidad;
-    li.dataset.orden = 1;
-    li.dataset.estado = false;
-
-    li.innerHTML = `
-        ${nombre} <span class="cantidad">x${cantidad}</span> - 
-        <span class="precio-total">${(precio * cantidad).toFixed(2)}€</span>
-    `;
-
-    // Crear desplegable al hacer click
-    li.addEventListener('click', (e) => {
-        // Evitar múltiples desplegables
-        if (li.querySelector('.editor')) {
-            return;
-        }
-
-        const editor = document.createElement('div');
-        editor.classList.add('editor');
-        editor.innerHTML = `
-            <input type="number" min="1" value="${li.dataset.cantidad}" />
-            <button class="guardar">Guardar</button>
-            <button class="eliminar">Eliminar</button>
-        `;
-
-        // Evitar que el editor desaparezca al hacer clic dentro de él
-        editor.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Guardar cambios
-        editor.querySelector('.guardar').addEventListener('click', () => {
-            const nuevaCantidad = parseInt(editor.querySelector('input').value);
-            if (nuevaCantidad < 1) return;
-            li.dataset.cantidad = nuevaCantidad;
-            li.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
-            li.querySelector('.precio-total').textContent = `${(nuevaCantidad * precio).toFixed(2)}€`;
-            editor.remove(); // Eliminar el editor al guardar
-            actualizarTotal();
-            guardarPedidoEnLocalStorage();
-        });
-
-        // Eliminar producto
-        editor.querySelector('.eliminar').addEventListener('click', () => {
-            li.remove();
-            actualizarTotal();
-            guardarPedidoEnLocalStorage();
-        });
-
-        li.appendChild(editor);
-    });
-
-    pedidoLista.appendChild(li);
-    actualizarTotal();
-    guardarPedidoEnLocalStorage();
-}
-
-function guardarPedidoEnLocalStorage() {
-    const pedidoLista = document.querySelector('.pedido ul');
-    const pedido = [...pedidoLista.children].map(li => {
-        return {
-            id: li.dataset.id,
-            nombre: li.dataset.nombre,
-            precio: parseFloat(li.dataset.precioUnitario),
-            cantidad: parseInt(li.dataset.cantidad),
-            orden: parseInt(li.dataset.orden),
-            estado: li.dataset.estado
-        };
-    });
-    localStorage.setItem('pedido', JSON.stringify(pedido));
-}
-
-function marcharComanda() {
-    const pedidoLista = JSON.parse(localStorage.getItem('pedido'));
-    if (!pedidoLista) return;
-
-    const marchar = pedidoLista.filter(item => 
-        item.orden == 1 && item.estado == 'false'
-    ).map(item => {
-        return {
-            id: item.id,
-            nombre: item.nombre,
-            cantidad: parseInt(item.cantidad),
-            };
-         });
-    // Aquí puedes realizar alguna acción con los elementos filtrados
-    console.log('Productos marchados:', marchar);
-    const listaMarchas = JSON.parse(localStorage.getItem('marchas'));
-    listaMarchas.marchados.push(marchar);
-    localStorage.setItem('marchas', JSON.stringify(listaMarchas));
-    return marchar;
-}
 
 // Funciones que realizan fetch de tipo GET
 
@@ -265,7 +90,7 @@ async function fetchProductos(idSubCategoria) {
 //GENERADORES, PARA QUE SEA DINAMICO
 
 //GENERA LA LISTA DE CATEGORIAS
-const mostrarCategorias = (categorias)=>{
+function mostrarCategorias(categorias){
     const container = document.getElementById("containerCategorias");
     const categoriasHTML = categorias.map(cat => {
         return `
@@ -289,7 +114,7 @@ function mostrarSubCategorias(subcategorias) {
     const containerHTML = subcategorias.map(subcategoria => {
         return `
             <div class="subCategoria" data-subcategoria="${subcategoria.id}">
-                <img src="https://as2.ftcdn.net/v2/jpg/00/19/81/87/1000_F_19818729_Jo5Q24Kdc1Sx9GE4m3z1QGhX6qRNLoTV.jpg" alt="${subcategoria.nombre}"/>
+                <img src="https://www.euskoguide.com/images/san-sebastian/san-sebastian-pintxos.jpg" alt="${subcategoria.nombre}"/>
                 <span>${subcategoria.nombre}</span>
             </div>
         `;
@@ -313,16 +138,23 @@ function mostrarSubCategorias(subcategorias) {
     
 }
 
-function actualizarTotal() {
-    const totalSpan = document.querySelector('.total span');
-    const pedidoLista = document.querySelector('.pedido ul');
-    let total = 0;
+function mostrarProductos(productos) {
+    const container = document.getElementById('containerListadoDatos');
+    container.innerHTML = ''; // Limpiar resultados previos
 
-    [...pedidoLista.children].forEach(li => {
-        const cantidad = parseInt(li.dataset.cantidad);
-        const precio = parseFloat(li.dataset.precioUnitario);
-        total += cantidad * precio;
-    });
+    if (productos.length === 0) {
+        container.innerHTML = 'No se encontraron productos.';    
+        return;
+    }
+    const containerHTML = productos.map(producto => {
+        return `
+            <div class="productos" data-producto="${producto.id} data-numOrden=${producto.numOrden}">
+                <p>${producto.nombre}</p>
+                <span>${producto.precio}€</span>
+            </div>
+            `;
+        }).join('');   
 
-    totalSpan.textContent = `${total.toFixed(2)}€`;
+    container.innerHTML = containerHTML;
+    handlerProductos();
 }
