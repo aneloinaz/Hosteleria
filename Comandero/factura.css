@@ -11,15 +11,17 @@ body {
   width: 300px;
   padding: 20px;
   border: 1px solid #ccc;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 
 }
+
 .empresa {
   text-align: center;
   font-size: 20px;
   font-weight: bold;
 }
-.datosEmpesa{
+
+.datosEmpesa {
   text-align: center;
   margin-top: auto;
   padding: auto;
@@ -37,7 +39,8 @@ body {
   padding: 4px 0;
 }
 
-.total, .iva {
+.total,
+.iva {
   margin-top: 10px;
   border-top: 1px dashed #000;
   padding-top: 5px;
