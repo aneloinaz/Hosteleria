@@ -1,0 +1,64 @@
+{
+  "salas": [
+    {
+      "nombre": "Sala 1",
+      "mesas": [
+        {
+          "id": 1,
+          "nombre": "n1",
+          "capacidad": 4
+        },
+        {
+          "id": 2,
+          "nombre": "n2",
+          "capacidad": 4
+        },
+        {
+          "id": 3,
+          "nombre": "n3",
+          "capacidad": 4
+        },
+        {
+          "id": 4,
+          "nombre": "n4",
+          "capacidad": 4
+        },
+        {
+          "id": 5,
+          "nombre": "n5",
+          "capacidad": 4
+        },
+        {
+          "id": 6,
+          "nombre": "n6",
+          "capacidad": 4
+        }
+      ]
+    },
+    {
+      "nombre": "Sala 2",
+      "mesas": [
+        {
+          "id": 7,
+          "nombre": "n7",
+          "capacidad": 6
+        },
+        {
+          "id": 8,
+          "nombre": "n8",
+          "capacidad": 6
+        },
+        {
+          "id": 9,
+          "nombre": "Mesa 9",
+          "capacidad": 6
+        },
+        {
+          "id": 10,
+          "nombre": "Mesa 10",
+          "capacidad": 6
+        }
+      ]
+    }
+  ]
+}
