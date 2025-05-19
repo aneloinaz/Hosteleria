@@ -101,7 +101,7 @@ aside{
 }
 .mesa {
   background-color: #f9f7f7;
-  border: 4px solid #050505;
+  border: 4px solid #0b0b0b;
   font-size: 28px;
   font-weight: bold;
   padding: 10px;
@@ -217,6 +217,7 @@ aside{
 .n17 {
   top: 350px;
   left: 516px;
+  left: 516px;
 }
 
 .n9 {
@@ -236,6 +237,7 @@ aside{
 
 .n16 {
   top: 625px;
+  left: 516px;
   left: 516px;
 }
 

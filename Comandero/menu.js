@@ -64,7 +64,7 @@ async function fetchCategorias() {
     }
 }
 
-// Cambié la URL para incluir el parametro categoria_id
+
 async function fetchSubCategorias(idCategoria) {
     try {
         // Aquí se ajusta la URL para cada categoria_id
