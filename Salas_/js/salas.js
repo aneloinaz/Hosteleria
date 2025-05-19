@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const salasData = await getSalas();
     let index = 0;
-    if (window.location.pathname.endsWith('sala2.html')) {
+    if (window.location.pathname.endsWith('../sala2.html')) {
         index = 1;
     }
     generarMesas(salasData.salas[index].mesas);
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     mesa.addEventListener('click', function() {
       const idMesa = this.getAttribute('data-id'); 
       localStorage.setItem('mesaSeleccionada', idMesa);
-     window.location.href = '../mesasHTML/mesa1.html';
+     window.location.href = '../../mesasHTML/mesa1.html';
     });
   });
 });
@@ -27,9 +27,18 @@ const generarMesas = (mesas) => {
 }
 
 async function getSalas() {
-    const response = await fetch("salas.json");
+    const response = await fetch("./json/salas.json");
     const data = await response.json();
     return data;
 }
 
 
+// id mesa
+// estado 0 1 2 3
+
+//  array y json
+
+// 0 libre 
+// 1 reservado 
+// 2 comanda pedia
+// 3 finalizado
