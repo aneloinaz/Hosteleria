@@ -17,17 +17,18 @@ document.addEventListener('DOMContentLoaded', async function () {
 export function handlerProductos() {
     document.querySelectorAll('.productos').forEach(productoEl => {
         productoEl.addEventListener('click', () => {
-            const id = productoEl.dataset.producto;
+            // Solo lee el valor del dataset, nunca el atributo completo
+            const id = productoEl.dataset.producto; // <-- Esto será solo "6"
             const nombre = productoEl.querySelector('p').textContent;
             const precio = productoEl.querySelector('span').textContent.replace('€', '');
-            const numOrden = productoEl.dataset.numOrden;
+            const numOrden = productoEl.dataset.numorden || 1; // minúsculas y valor por defecto
             agregarProductoAlPedido(nombre, precio, 1, id, numOrden);
         });
     });
 }
 
 
-export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
+export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrden) {
     const pedidoLista = document.querySelector('.pedido ul');
 
     // Verifica si el producto ya está en la lista
@@ -49,7 +50,7 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
     li.dataset.nombre = nombre;
     li.dataset.precioUnitario = precio;
     li.dataset.cantidad = cantidad;
-    li.dataset.orden = 1;
+    li.dataset.orden = numOrden || 1; // <-- GUARDA numOrden
     li.dataset.estado = false;
 
     li.innerHTML = `
@@ -130,7 +131,7 @@ function guardarPedidoEnLocalStorage() {
             nombre: li.dataset.nombre,
             precio: parseFloat(li.dataset.precioUnitario),
             cantidad: parseInt(li.dataset.cantidad),
-            orden: parseInt(li.dataset.orden),
+            numOrden: parseInt(li.dataset.orden), // <-- GUARDA numOrden
             estado: li.dataset.estado
         };
     });

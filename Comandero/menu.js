@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pedido = JSON.parse(pedidoGuardado);
 
             // 1. Crear la comanda
+            console.log('mesaId que se envía a crearComanda:', mesaId);
             await crearComanda(mesaId);
 
             // 2. Esperar y obtener comandas abiertas
@@ -74,12 +75,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             let idComanda = null;
-            let lista = Array.isArray(comandasAbiertas) ? comandasAbiertas : (comandasAbiertas.comandas || []);
+            let lista = Array.isArray(comandasAbiertas)
+                ? comandasAbiertas
+                : (comandasAbiertas.comandas || []);
+            console.log('Lista de comandas abiertas:', lista);
+
             if (lista.length > 0) {
-                // Si hay campo de fecha, puedes ordenar por fecha para mayor seguridad
+                // Busca el campo correcto en el último elemento
                 const comandaReciente = lista[lista.length - 1];
                 console.log('Comanda reciente:', comandaReciente);
-                idComanda = comandaReciente.idComanda || comandaReciente.Idcomanda || comandaReciente.id || comandaReciente.comandaId;
+
+                // Busca el primer campo numérico válido
+                idComanda =
+                    comandaReciente.idComanda ||
+                    comandaReciente.Idcomanda ||
+                    comandaReciente.id ||
+                    comandaReciente.comandaId ||
+                    null;
+
+                // Si sigue sin encontrarse, busca cualquier campo numérico
+                if (!idComanda) {
+                    for (const key in comandaReciente) {
+                        if (
+                            typeof comandaReciente[key] === 'number' &&
+                            comandaReciente[key] > 0
+                        ) {
+                            idComanda = comandaReciente[key];
+                            break;
+                        }
+                    }
+                }
             }
             console.log('idComanda:', idComanda);
 
@@ -94,24 +119,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('idComanda guardado en local storage:', idComanda);
             console.log('idComanda obtenido:', idComanda);
 
-            // 4. Insertar detalles de la comanda usando arrays separados
-            const listidComanda = [];
-            const listidProducto = [];
-            const listcantidad = [];
-
-            pedido.forEach(producto => {
-                listidComanda.push(Number(idComanda));  // mismo id para todos
-                listidProducto.push(Number(producto.id));
-                listcantidad.push(Number(producto.cantidad));
+            // 4. Insertar detalles de la comanda usando array de objetos
+            const detalles = pedido.map(producto => {
+                console.log('Producto en pedido:', producto); // Depuración
+                return {
+                    idComanda: Number(idComanda),
+                    idProducto: Number(producto.id), // Solo el id limpio
+                    cantidad: Number(producto.cantidad)
+                    // Si necesitas numOrden, puedes añadirlo aquí: numOrden: producto.numOrden
+                };
             });
 
-            const body = {
-                listidComanda,
-                listidProducto,
-                listcantidad
-            };
-
-            console.log('Body que se envía a detalle:', body);
+            console.log('Body que se envía a detalle (prueba):', detalles);
 
             const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
             const resDetalle = await fetch(urlDetalle, {
@@ -119,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(body)
+                body: JSON.stringify(detalles)
             });
 
             let dataDetalle = null;
@@ -140,11 +159,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Comanda enviada correctamente');
             // Limpia el pedido y vuelve a la sala
             localStorage.removeItem(`pedido_mesa_${mesaId}`);
-            if (mesaId === '1' || mesaId === '2') {
-                window.location.href = 'salas1.html';
-            } else {
-                window.location.href = 'salas2.html';
-            }
+            window.location.href = 'salas1.html';
+            
         });
     }
 });
@@ -237,22 +253,20 @@ function mostrarSubCategorias(subcategorias) {
 
 function mostrarProductos(productos) {
     const container = document.getElementById('containerListadoDatos');
-    container.innerHTML = ''; // Limpiar resultados previos
+    container.innerHTML = '';
 
     if (productos.length === 0) {
         container.innerHTML = 'No se encontraron productos.';
         return;
     }
     const containerHTML = productos.map(producto => {
+        // Si producto.numOrden no existe, pon 1 por defecto
         return `
-            <div class="productos" data-producto="${producto.id} data-numOrden=${producto.numOrden}">
+            <div class="productos" data-producto="${producto.id}">
                 <p>${producto.nombre}</p>
                 <span>${producto.precio}€</span>
             </div>
-                <p>${producto.nombre}</p>
-                <span>${producto.precio}€</span>
-            </div>
-            `;
+        `;
     }).join('');
 
     container.innerHTML = containerHTML;
@@ -280,18 +294,18 @@ async function obtenerComandasAbiertas(idMesa) {
 // Función para insertar un detalle de comanda
 async function insertarDetalleComanda(idComanda, producto) {
     const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
-    const body = [{
+    const comanda = [{
         idComanda: Number(idComanda),
         idProducto: Number(producto.id),
         cantidad: Number(producto.cantidad)
     }];
-    console.log('Body que se envía:', body);
+    console.log('Body que se envía:', comanda);
     const resDetalle = await fetch(urlDetalle, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(comanda)
     });
 
     let dataDetalle = null;
