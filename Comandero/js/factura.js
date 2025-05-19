@@ -1,12 +1,32 @@
-// Función para calcular el total 
-function calcularMediaxComensal() {
-    const total = parseFloat(document.getElementById('total').textContent);
-    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1; 
-    const mediaxComensal = total / numComensales;
-    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
-}
-
 function mostrarPedidoEnCobrar() {
+    const lista = document.getElementById('listaCobro');
+    lista.innerHTML = '';
+
+    fetch("https://apiostalaritza.lhusurbil.eus/api/GetDetallePedido") // ← URL real de la API, sin "swagger/index.html"
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(pedido => {
+            if (!pedido || pedido.length === 0) {
+                lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+                return;
+            }
+            pedido.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
+                lista.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener el pedido:', error);
+            lista.innerHTML = '<li>Error al cargar el pedido.</li>';
+        });
+    }
+
+/*function mostrarPedidoEnCobrar() {
     const pedidoGuardado = localStorage.getItem('pedido');
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
@@ -22,8 +42,14 @@ function mostrarPedidoEnCobrar() {
         li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
         lista.appendChild(li);
     });
-}
-
+}*/
+// Función para calcular la media por comensal  
+function calcularMediaxComensal() {
+    const total = parseFloat(document.getElementById('total').textContent);
+    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1; 
+    const mediaxComensal = total / numComensales;
+    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
+} 
 function mostrarTotalEnCobrar() {
     const pedidoGuardado = localStorage.getItem('pedido');
     const totalSpan = document.getElementById('totalCobro');
