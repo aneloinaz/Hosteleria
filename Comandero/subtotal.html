@@ -10,13 +10,18 @@
     <main>
         
         <div id="ticket">
-            <!-- Aquí se mostrará el ticket de compra -->
-                <div class="empresa">CIFP Usurbil LHII</div>
-                <div class="datosEmpresa">Etarte bidea<br>9<br>Zubieta-Usurbil<br>20170<br>943364600</div>
+     <!-- Aquí se mostrará la información de la empresa -->
+      <div class="empresa">CIFP Usurbil LHII</div>
+      <div class="datosEmpesa">
+        Etarte bidea<br />
+        9<br />
+        Zubieta-Usurbil<br />
+        20170<br />
+        943364600
+      </div>
             
-                <div class="section bold">SUBTOTAL</div>
-                <div class="infoMesa">
-      <div class="section bold">FACTURA SIMPLIFICADA</div>
+    <div class="infoMesa">
+      <div class="section bold">SUBTOTAL</div>
         <div class="section">
             <div class="section" id="fecha-hora"></div>
             <div class="section">Sala-Mesa:</div>
@@ -25,26 +30,30 @@
             <div class="section" id="comensales"></div>
             <div class="section">Media x comensal: <span id="mediaxComensal">0.00</span> €</div>
     </div>
+    </div>
 
-                <div class="section">
-                  <script src="factura.js"></script>
-                </div>
             
-                <div class="total">
-                    <div class="section">TOTAL</div>
-                    <div class="section" id="total">
-        
-                    </div>
-                </div>
-                <!-- Aquí se mostrará los impuestos -->
+              
+             
+         <div class="total">
+        <!--esta parte es donde esta el resumene de pedido-->
+        <div class="section">
+            <ul id="listaCobro"></ul>
+        </div>
+        <!-- Aquí es la parte del total -->
+        <div class="section">TOTAL</div>
+        <div class="section"><span id="total">0.00</span> €</div>
+      </div>
+        <div class="section">
+        <div class="section" id="forma-pago"></div>
+        <!-- Aquí se mostrará los impuestos -->
         <div>Impuestos incluidos</div>
         <div class="iva">
         <div>IVA 10% - Base: <span id="base-iva">0.00</span> € Cuota <span id="cuota-iva">0.00</span> €</div>
       </div>
-            
-              
-             
-        </div>
+      <div id="contenedorQR" class="section"></div>
+    </div>
+</div>
         <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir</button> 
     </main>
     <script src="cobrar.js"></script>
