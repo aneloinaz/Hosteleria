@@ -189,6 +189,7 @@
     min-height: 60%;
     max-height: 60%;
     overflow-y: scroll;
+    padding: 0;
   }
   
   .pedido li {
@@ -205,7 +206,8 @@
     cursor: pointer;
     border-radius: 10px;
     text-align: center;
-  
+    margin: 4px 0;
+    padding: 2px 6px;
   }
   
   .pedido li:nth-child(odd) {
@@ -519,3 +521,12 @@
     }
   
   }
+  
+  .producto-enviado {
+    background: #b6e7a6 !important;
+    color: #333 !important;
+}
+.producto-noenviado {
+    background: #ffe0b2 !important;
+    color: #333 !important;
+}

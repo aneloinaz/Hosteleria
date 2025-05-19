@@ -1,3 +1,5 @@
+import { pintarPedidoUlConEstado } from "./menu.js";
+
 document.addEventListener('DOMContentLoaded', async function () {
     console.log("Cargado el DOM en pedido.js");
 

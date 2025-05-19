@@ -49,51 +49,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnEnviar) {
         btnEnviar.addEventListener('click', async () => {
             const mesaId = localStorage.getItem('mesaSeleccionada');
+            console.log('[ENVIAR] mesaId:', mesaId);
+
             if (!mesaId) {
                 alert('No se ha seleccionado ninguna mesa.');
                 return;
             }
 
             const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+            console.log('[ENVIAR] pedidoGuardado:', pedidoGuardado);
+
             if (!pedidoGuardado) {
                 alert('No hay productos en el pedido.');
                 return;
             }
             const pedido = JSON.parse(pedidoGuardado);
+            console.log('[ENVIAR] pedido:', pedido);
 
-            // 1. Crear la comanda
-            console.log('mesaId que se envía a crearComanda:', mesaId);
-            await crearComanda(mesaId);
-
-            // 2. Esperar y obtener comandas abiertas
+            // 1. Obtener comandas abiertas
             await new Promise(resolve => setTimeout(resolve, 500));
             const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
-            console.log('Comandas abiertas:', comandasAbiertas);
-            if (comandasAbiertas.length === 0) {
-                alert('No se encontraron comandas abiertas.');
-                return;
-            }
+            console.log('[ENVIAR] comandasAbiertas:', comandasAbiertas);
+
+            let lista = Array.isArray(comandasAbiertas.comandas)
+                ? comandasAbiertas.comandas
+                : [];
 
             let idComanda = null;
-            let lista = Array.isArray(comandasAbiertas)
-                ? comandasAbiertas
-                : (comandasAbiertas.comandas || []);
-            console.log('Lista de comandas abiertas:', lista);
 
             if (lista.length > 0) {
-                // Busca el campo correcto en el último elemento
+                // Ya hay comanda abierta, usa la última
                 const comandaReciente = lista[lista.length - 1];
-                console.log('Comanda reciente:', comandaReciente);
-
-                // Busca el primer campo numérico válido
+                console.log('[ENVIAR] comandaReciente:', comandaReciente);
                 idComanda =
                     comandaReciente.idComanda ||
                     comandaReciente.Idcomanda ||
                     comandaReciente.id ||
                     comandaReciente.comandaId ||
                     null;
-
-                // Si sigue sin encontrarse, busca cualquier campo numérico
                 if (!idComanda) {
                     for (const key in comandaReciente) {
                         if (
@@ -105,32 +98,58 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 }
+            } else {
+                // No hay comanda abierta, crea una nueva
+                console.log('[ENVIAR] No hay comanda abierta, creando nueva...');
+                const nuevaComanda = await crearComanda(mesaId);
+                console.log('[ENVIAR] nuevaComanda:', nuevaComanda);
+                idComanda =
+                    nuevaComanda.idComanda ||
+                    nuevaComanda.Idcomanda ||
+                    nuevaComanda.id ||
+                    nuevaComanda.comandaId ||
+                    null;
             }
-            console.log('idComanda:', idComanda);
 
-            // Comprobar si el idComanda es válido
+            console.log('[ENVIAR] idComanda final:', idComanda);
+
             if (!idComanda) {
                 alert('No se pudo obtener el id de la comanda.');
                 return;
             }
-            // Guardar el idComanda en el local storage
             localStorage.setItem('idComanda', idComanda);
-            // Mostrar el idComanda en la consola
-            console.log('idComanda guardado en local storage:', idComanda);
-            console.log('idComanda obtenido:', idComanda);
 
-            // 4. Insertar detalles de la comanda usando array de objetos
-            const detalles = pedido.map(producto => {
-                console.log('Producto en pedido:', producto); // Depuración
-                return {
+            // --- Obtener productos ya enviados ---
+            let productosEnviados = [];
+            for (const comanda of lista) {
+                const idCom = comanda.idComanda;
+                if (!idCom) continue;
+                const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idCom}`);
+                const detalleData = await detalleRes.json();
+                console.log(`[ENVIAR] Detalle de comanda ${idCom}:`, detalleData);
+                if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+                    productosEnviados = productosEnviados.concat(
+                        detalleData.detalleComandas.map(d => d.idProducto)
+                    );
+                }
+            }
+            console.log('[ENVIAR] productosEnviados:', productosEnviados);
+
+            // --- Filtrar solo los productos nuevos ---
+            const detalles = pedido
+                .filter(producto => !productosEnviados.includes(Number(producto.id)))
+                .map(producto => ({
                     idComanda: Number(idComanda),
-                    idProducto: Number(producto.id), // Solo el id limpio
+                    idProducto: Number(producto.id),
                     cantidad: Number(producto.cantidad)
-                    // Si necesitas numOrden, puedes añadirlo aquí: numOrden: producto.numOrden
-                };
-            });
+                }));
 
-            console.log('Body que se envía a detalle (prueba):', detalles);
+            console.log('[ENVIAR] detalles a enviar:', detalles);
+
+            if (detalles.length === 0) {
+                alert('No hay productos nuevos para enviar.');
+                return;
+            }
 
             const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
             const resDetalle = await fetch(urlDetalle, {
@@ -149,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('Respuesta no es JSON válido:', textDetalle);
                 dataDetalle = {};
             }
-            console.log('Respuesta detalle:', dataDetalle);
+            console.log('[ENVIAR] Respuesta detalle:', dataDetalle);
 
             if (!resDetalle.ok || dataDetalle.ok === false) {
                 alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
@@ -160,9 +179,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Limpia el pedido y vuelve a la sala
             localStorage.removeItem(`pedido_mesa_${mesaId}`);
             window.location.href = 'salas1.html';
-            
         });
     }
+
+    await pintarPedidoUlConEstado();
 });
 
 // Funciones que realizan fetch de tipo GET
@@ -323,4 +343,73 @@ async function insertarDetalleComanda(idComanda, producto) {
         return false;
     }
     return true;
+}
+
+export async function pintarPedidoUlConEstado() {
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (!mesaId) return;
+
+    // 1. Obtener todas las comandas abiertas de la mesa
+    const comandasData = await obtenerComandasAbiertas(mesaId);
+    const comandas = Array.isArray(comandasData.comandas)
+        ? comandasData.comandas
+        : [];
+
+    // 2. Obtener detalles de cada comanda (productos ya enviados, con info completa)
+    let productosEnviados = [];
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+        const detalleData = await detalleRes.json();
+        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+            productosEnviados = productosEnviados.concat(detalleData.detalleComandas);
+        }
+    }
+
+    // Agrupa productos enviados por idProducto (sumando cantidades si hay varios)
+    const enviadosAgrupados = {};
+    productosEnviados.forEach(prod => {
+        if (!enviadosAgrupados[prod.idProducto]) {
+            enviadosAgrupados[prod.idProducto] = {
+                nombre: prod.nombre,
+                cantidad: Number(prod.cantidad) || 0,
+                precio: Number(prod.precio) || 0
+            };
+        } else {
+            enviadosAgrupados[prod.idProducto].cantidad += Number(prod.cantidad) || 0;
+        }
+    });
+
+    // Asegúrate de que productosEnviados es un array de números
+    const productosEnviadosIds = productosEnviados.map(prod => Number(prod.idProducto));
+
+    // 3. Mostrar la lista de productos del pedido actual (pendientes)
+    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+
+    const lista = document.querySelector('.pedido-ul');
+    if (!lista) return;
+    lista.innerHTML = '';
+
+    // Siempre muestra los productos enviados (en verde)
+    Object.entries(enviadosAgrupados).forEach(([id, prod]) => {
+        const cantidad = Number(prod.cantidad) || 0;
+        const precio = Number(prod.precio) || 0;
+        const li = document.createElement('li');
+        li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
+        li.classList.add('producto-enviado');
+        lista.appendChild(li);
+    });
+
+    // Luego muestra los productos pendientes (en naranja)
+    pedido.forEach(producto => {
+        if (productosEnviadosIds.includes(Number(producto.id))) return;
+        const cantidad = Number(producto.cantidad) || 0;
+        const precio = Number(producto.precio) || 0;
+        const li = document.createElement('li');
+        li.textContent = `${producto.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
+        li.classList.add('producto-noenviado');
+        lista.appendChild(li);
+    });
 }
