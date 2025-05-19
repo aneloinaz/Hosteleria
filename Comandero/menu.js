@@ -48,14 +48,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnEnviar = document.getElementById('boton-esperar');
     if (btnEnviar) {
         btnEnviar.addEventListener('click', async () => {
-            // Recupera el id de la mesa seleccionada
             const mesaId = localStorage.getItem('mesaSeleccionada');
             if (!mesaId) {
                 alert('No se ha seleccionado ninguna mesa.');
                 return;
             }
 
-            // Recupera el pedido de la mesa
             const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
             if (!pedidoGuardado) {
                 alert('No hay productos en el pedido.');
@@ -64,38 +62,79 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pedido = JSON.parse(pedidoGuardado);
 
             // 1. Crear la comanda
-            const idMesa = localStorage.getItem('mesaSeleccionada');
-            console.log('idMesa que se envía:', idMesa);
-            const url = `https://apiostalaritza.lhusurbil.eus/PostCrearComanda?idMesa=${idMesa}`;
-            const res = await fetch(url, { method: 'POST' });
-            const data = await res.json();
-            console.log('Respuesta JSON de PostCrearComanda:', data); // <-- Pega aquí el resultado
-            const idComanda = data.idComanda || data.IdComanda || data.id || data.comandaId;
-            console.log('ID Comanda:', idComanda);
-            if (!idComanda) {
-                alert('No se pudo crear la comanda.');
+            await crearComanda(mesaId);
+
+            // 2. Esperar y obtener comandas abiertas
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
+            console.log('Comandas abiertas:', comandasAbiertas);
+            if (comandasAbiertas.length === 0) {
+                alert('No se encontraron comandas abiertas.');
                 return;
             }
 
-            console.log('Respuesta JSON de PostCrearComanda:', data);
+            let idComanda = null;
+            let lista = Array.isArray(comandasAbiertas) ? comandasAbiertas : (comandasAbiertas.comandas || []);
+            if (lista.length > 0) {
+                // Si hay campo de fecha, puedes ordenar por fecha para mayor seguridad
+                const comandaReciente = lista[lista.length - 1];
+                console.log('Comanda reciente:', comandaReciente);
+                idComanda = comandaReciente.idComanda || comandaReciente.Idcomanda || comandaReciente.id || comandaReciente.comandaId;
+            }
+            console.log('idComanda:', idComanda);
 
-            // 2. Insertar detalles de la comanda
-            for (const producto of pedido) {
-                console.log('Insertando detalle:', {
-                    idComanda,
-                    idProducto: producto.id,
-                    cantidad: producto.cantidad
-                });
-                const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda?idComanda=${encodeURIComponent(idComanda)}&idProducto=${encodeURIComponent(producto.id)}&cantidad=${encodeURIComponent(producto.cantidad)}`;
-                const resDetalle = await fetch(urlDetalle, {
-                    method: 'POST'
-                });
-                const dataDetalle = await resDetalle.json();
-                console.log('Respuesta detalle:', dataDetalle);
-                if (!resDetalle.ok || dataDetalle.ok === false) {
-                    alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
-                    return;
-                }
+            // Comprobar si el idComanda es válido
+            if (!idComanda) {
+                alert('No se pudo obtener el id de la comanda.');
+                return;
+            }
+            // Guardar el idComanda en el local storage
+            localStorage.setItem('idComanda', idComanda);
+            // Mostrar el idComanda en la consola
+            console.log('idComanda guardado en local storage:', idComanda);
+            console.log('idComanda obtenido:', idComanda);
+
+            // 4. Insertar detalles de la comanda usando arrays separados
+            const listidComanda = [];
+            const listidProducto = [];
+            const listcantidad = [];
+
+            pedido.forEach(producto => {
+                listidComanda.push(Number(idComanda));  // mismo id para todos
+                listidProducto.push(Number(producto.id));
+                listcantidad.push(Number(producto.cantidad));
+            });
+
+            const body = {
+                listidComanda,
+                listidProducto,
+                listcantidad
+            };
+
+            console.log('Body que se envía a detalle:', body);
+
+            const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
+            const resDetalle = await fetch(urlDetalle, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            let dataDetalle = null;
+            const textDetalle = await resDetalle.text();
+            try {
+                dataDetalle = textDetalle ? JSON.parse(textDetalle) : {};
+            } catch (e) {
+                console.error('Respuesta no es JSON válido:', textDetalle);
+                dataDetalle = {};
+            }
+            console.log('Respuesta detalle:', dataDetalle);
+
+            if (!resDetalle.ok || dataDetalle.ok === false) {
+                alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+                return;
             }
 
             alert('Comanda enviada correctamente');
@@ -218,4 +257,56 @@ function mostrarProductos(productos) {
 
     container.innerHTML = containerHTML;
     handlerProductos();
+}
+
+// Función para crear la comanda
+async function crearComanda(idMesa) {
+    const url = `https://apiostalaritza.lhusurbil.eus/PostCrearComanda?idMesa=${idMesa}`;
+    const res = await fetch(url, { method: 'POST' });
+    const data = await res.json();
+    console.log('Respuesta JSON de PostCrearComanda:', data);
+    return data;
+}
+
+// Función para obtener comandas abiertas de una mesa
+async function obtenerComandasAbiertas(idMesa) {
+    const url = `https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${idMesa}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    console.log('Comandas abiertas recibidas:', data); // <-- aquí el cambio
+    return data;
+}
+
+// Función para insertar un detalle de comanda
+async function insertarDetalleComanda(idComanda, producto) {
+    const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
+    const body = [{
+        idComanda: Number(idComanda),
+        idProducto: Number(producto.id),
+        cantidad: Number(producto.cantidad)
+    }];
+    console.log('Body que se envía:', body);
+    const resDetalle = await fetch(urlDetalle, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    let dataDetalle = null;
+    const textDetalle = await resDetalle.text();
+    try {
+        dataDetalle = textDetalle ? JSON.parse(textDetalle) : {};
+    } catch (e) {
+        console.error('Respuesta no es JSON válido:', textDetalle);
+        dataDetalle = {};
+    }
+    console.log('Respuesta detalle:', dataDetalle);
+
+    if (!resDetalle.ok || dataDetalle.ok === false) {
+        alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+        return false;
+    }
+    return true;
 }
