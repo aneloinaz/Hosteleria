@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const mesas = document.getElementsByClassName("mesa");
+export async function actualizarEstado(){
+  const mesas = document.getElementsByClassName("mesa");
 
     const estados = await cargarEstadosDesdeJSON();
 
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cambiarColorMesa(mesa, mesaEstado.estado);
         }
     });
-});
+}
 
 async function cargarEstadosDesdeJSON() {
     try {

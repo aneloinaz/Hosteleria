@@ -1,4 +1,5 @@
-// Mendez
+import { actualizarEstado } from "./mesasEstado.js";
+
 document.addEventListener('DOMContentLoaded', async () => {
     let cont  = 0;
     async function actualizarMesas() {
@@ -18,6 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.location.href = 'info1.html';
             });
         });
+
+        await actualizarEstado();
         console.log("actualizacion: "+(cont++));
     }
 
