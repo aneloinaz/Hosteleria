@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const salasData = await getSalas();
     let index = 0;
-    if (window.location.pathname.endsWith('../sala2.html')) {
+    if (window.location.pathname.endsWith('sala2.html')) {
         index = 1;
     }
     generarMesas(salasData.salas[index].mesas);
