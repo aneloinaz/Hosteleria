@@ -37,10 +37,11 @@
    function cancelarPago() {
     if (confirm('¿Estás seguro de cancelar la operació?')) {
         localStorage.removeItem('pedido'); 
-        resumenTicket();    
-        window.location.href = 'menu.html';
+        resumenTicket(); 
+        window.location.href = 'Comandero/menu.html';
     } else {
         alert('Operacion cancelada');
+        window.location.href = 'Comandero/menu.html';
     }
 }
 

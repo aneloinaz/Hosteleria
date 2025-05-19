@@ -1,19 +1,10 @@
-function imprimirTicket() {
-    const ticket = document.getElementById('ticket');
-    const ventanaImpresion = window.open('', '', 'width=600,height=400');
-    ventanaImpresion.document.write('<html ><head><title>Ticket de compra</title></head><body>');
-    ventanaImpresion.document.write(ticket.innerHTML);
-    ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
-    ventanaImpresion.document.close();
-    ventanaImpresion.print();
-    ventanaImpresion.close();
-    alert('El ticket se ha impreso correctamente');
-    window.location.href = './Comandero/menu.html';
+// Función para calcular el total 
+function calcularMediaxComensal() {
+    const total = parseFloat(document.getElementById('total').textContent);
+    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1; 
+    const mediaxComensal = total / numComensales;
+    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
 }
-document.addEventListener('DOMContentLoaded', () => {
-    mostrarPedidoEnCobrar();
-    mostrarTotalEnCobrar();
-});
 
 function mostrarPedidoEnCobrar() {
     const pedidoGuardado = localStorage.getItem('pedido');
@@ -61,14 +52,28 @@ function calcularCuota() {
     const cuota = total * 0.10;
     document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
 }
-function calcularMediaxComensal() {
-    const total = parseFloat(document.getElementById('total').textContent);
-    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1; 
-    const mediaxComensal = total / numComensales;
-    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
-}
 
-function mostrarQR() {
+
+// Función para imprimir el ticket
+function imprimirTicket() {
+    const ticket = document.getElementById('ticket');
+    const ventanaImpresion = window.open('', '', 'width=600,height=400');
+    ventanaImpresion.document.write('<html ><head><title>Ticket de compra</title></head><body>');
+    ventanaImpresion.document.write(ticket.innerHTML);
+    ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
+    ventanaImpresion.document.close();
+    ventanaImpresion.print();
+    ventanaImpresion.close();
+    alert('El ticket se ha impreso correctamente');
+    window.location.href = './Comandero/menu.html';
+}
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarPedidoEnCobrar();
+    mostrarTotalEnCobrar();
+});
+
+
+/*function mostrarQR() {
     // Puedes personalizar el texto del QR 
     const total = document.getElementById('total').textContent;
     const textoQR = `Total factura: ${total} €`;
@@ -84,4 +89,4 @@ function mostrarQR() {
         document.body.appendChild(imgQR); // O en el contenedor que prefieras
     }
     imgQR.src = urlQR;
-}
+}*/
