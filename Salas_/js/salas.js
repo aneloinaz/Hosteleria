@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     mesa.addEventListener('click', function() {
       const idMesa = this.getAttribute('data-id'); 
       localStorage.setItem('mesaSeleccionada', idMesa);
-     window.location.href = '../../mesasHTML/mesa1.html';
+     window.location.href = 'info1.html';
     });
   });
 });
