@@ -14,17 +14,33 @@ if (idMesa){
 }
 
 function consultarCapacidad(idMesa) {
-  const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
+  // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
+  const url = "../Salas_/salas.json"
   fetch(url)
-    .then(response =>{
-      if(!response.ok){
+    .then(response => {
+      if (!response.ok) {
         throw new Error('Error de red: ' + response.status);
       }
       return response.json();
     })
-    .then(data =>{;
-      console.log('Capacidad de la mesa ${idMesa}:', data.capacidad);
-      document.querySelector('.numero').textContent = data.capacidad;
+    .then(data => {
+      //Se modifica para que se ajuste al json de prueba
+      // Buscar la mesa por id en todas las salas
+      let capacidad = null;
+      for (const sala of data.salas) {
+        const mesa = sala.mesas.find(m => m.id == idMesa);
+        if (mesa) {
+          capacidad = mesa.capacidad;
+          break;
+        }
+      }
+      if (capacidad !== null) {
+        console.log(`Capacidad de la mesa ${idMesa}:`, capacidad);
+        numeroSpan.textContent = capacidad;
+      } else {
+        console.error('No se encontró la mesa con id', idMesa);
+        alert('No se encontró la mesa seleccionada.');
+      }
     })
     .catch(error=>{
       console.error('Error al consultar la capacidad de la mesa ;', error);
