@@ -8,7 +8,7 @@ function imprimirTicket() {
     ventanaImpresion.print();
     ventanaImpresion.close();
     alert('El ticket se ha impreso correctamente');
-    window.location.href = 'menu.html';
+    window.location.href = './Comandero/menu.html';
 }
 document.addEventListener('DOMContentLoaded', () => {
     mostrarPedidoEnCobrar();
