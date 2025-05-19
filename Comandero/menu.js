@@ -1,22 +1,51 @@
+// meter manualmente la mesa
+    //const mesa = 1;
+    //const comensales = 4;
+    //const hora = new Date().toLocaleTimeString();
+    //const fecha = new Date().toLocaleDateString();
+    // Guardar datos de la mesa en el local storage
+    //localStorage.setItem('datosMesa', JSON.stringify({ mesa, comensales, hora, fecha }));
 document.addEventListener('DOMContentLoaded', async () => {
+    const datosMesa = JSON.parse(localStorage.getItem('datosMesa'));
+    
+    
+    if(!datosMesa){
+        alert('No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.');
+        window.location.href = 'index.html';
+    }
     // Recuperar datos del local storage al cargar la página
     const pedidoGuardado = localStorage.getItem('pedido');
+
+
     if (pedidoGuardado) {
         const pedido = JSON.parse(pedidoGuardado);
         pedido.forEach(item => {
             agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id);
         });
     }
-    const categorias = await fetchCategorias();
-    
-    if (categorias.length > 0) {
-        const primeraId = categorias[0].id;
 
-        const subcategorias = await fetchSubCategorias(primeraId);
+
+    //marchaas
+    const marchas = {
+        mesa : datosMesa.mesa,
+        marchados : [],
+        
+    }
+
+    localStorage.setItem('marchas', JSON.stringify(marchas));
+
+    //
+
+    const categoriasJson = await fetchCategorias();
+    
+    if (categoriasJson.categorias.length > 0) {
+        const primeraId = categoriasJson.categorias[0].id;
+
+        const subcategoriasJson = await fetchSubCategorias(primeraId);
 
         //mostrar lista de categorias al cargar
-        mostrarCategorias(categorias);
-        mostrarSubCategorias(subcategorias);
+        mostrarCategorias(categoriasJson.categorias);
+        mostrarSubCategorias(subcategoriasJson.categorias);
     }
     // Event listener de categorias para que muestren Subcategorias
     document.querySelectorAll('#containerCategorias li').forEach(link => {
@@ -26,8 +55,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
             const subcategorias = await fetchSubCategorias(id);
-            mostrarSubCategorias(subcategorias);
+            mostrarSubCategorias(subcategorias.categorias);
         });
+    });
+
+    // Event listener para marchar comanda
+    document.getElementById('marchar').addEventListener('click', () => { 
+        marcharComanda();
     });
 });
 
@@ -63,7 +97,6 @@ function mostrarProductos(productos) {
 
 function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
     const pedidoLista = document.querySelector('.pedido ul');
-    const totalSpan = document.querySelector('.total span');
 
     // Verifica si el producto ya está en la lista
     let itemExistente = [...pedidoLista.children].find(li => li.dataset.id === id);
@@ -84,6 +117,8 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
     li.dataset.nombre = nombre;
     li.dataset.precioUnitario = precio;
     li.dataset.cantidad = cantidad;
+    li.dataset.orden = 1;
+    li.dataset.estado = false;
 
     li.innerHTML = `
         ${nombre} <span class="cantidad">x${cantidad}</span> - 
@@ -91,9 +126,11 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
     `;
 
     // Crear desplegable al hacer click
-    li.addEventListener('click', () => {
+    li.addEventListener('click', (e) => {
         // Evitar múltiples desplegables
-        if (li.querySelector('.editor')) return;
+        if (li.querySelector('.editor')) {
+            return;
+        }
 
         const editor = document.createElement('div');
         editor.classList.add('editor');
@@ -103,6 +140,11 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
             <button class="eliminar">Eliminar</button>
         `;
 
+        // Evitar que el editor desaparezca al hacer clic dentro de él
+        editor.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
         // Guardar cambios
         editor.querySelector('.guardar').addEventListener('click', () => {
             const nuevaCantidad = parseInt(editor.querySelector('input').value);
@@ -110,7 +152,7 @@ function agregarProductoAlPedido(nombre, precio, cantidad = 1, id) {
             li.dataset.cantidad = nuevaCantidad;
             li.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
             li.querySelector('.precio-total').textContent = `${(nuevaCantidad * precio).toFixed(2)}€`;
-            editor.remove();
+            editor.remove(); // Eliminar el editor al guardar
             actualizarTotal();
             guardarPedidoEnLocalStorage();
         });
@@ -137,18 +179,40 @@ function guardarPedidoEnLocalStorage() {
             id: li.dataset.id,
             nombre: li.dataset.nombre,
             precio: parseFloat(li.dataset.precioUnitario),
-            cantidad: parseInt(li.dataset.cantidad)
+            cantidad: parseInt(li.dataset.cantidad),
+            orden: parseInt(li.dataset.orden),
+            estado: li.dataset.estado
         };
     });
     localStorage.setItem('pedido', JSON.stringify(pedido));
 }
 
+function marcharComanda() {
+    const pedidoLista = JSON.parse(localStorage.getItem('pedido'));
+    if (!pedidoLista) return;
+
+    const marchar = pedidoLista.filter(item => 
+        item.orden == 1 && item.estado == 'false'
+    ).map(item => {
+        return {
+            id: item.id,
+            nombre: item.nombre,
+            cantidad: parseInt(item.cantidad),
+            };
+         });
+    // Aquí puedes realizar alguna acción con los elementos filtrados
+    console.log('Productos marchados:', marchar);
+    const listaMarchas = JSON.parse(localStorage.getItem('marchas'));
+    listaMarchas.marchados.push(marchar);
+    localStorage.setItem('marchas', JSON.stringify(listaMarchas));
+    return marchar;
+}
 
 // Funciones que realizan fetch de tipo GET
 
 async function fetchCategorias() {
     try {
-        const res = await fetch('http://192.168.24.96:3000/categorias');
+        const res = await fetch('https://apiostalaritza.lhusurbil.eus/GetCategorias');
         return await res.json();
     } catch (e) {
         console.error('Error cargando categorías');
@@ -160,7 +224,7 @@ async function fetchCategorias() {
 async function fetchSubCategorias(idCategoria) {
     try {
         // Aquí se ajusta la URL para cada categoria_id
-        const res = await fetch(`http://192.168.24.96:3000/subcategorias?categoria_id=${idCategoria}`);
+        const res = await fetch(`https://apiostalaritza.lhusurbil.eus/GetSubCategorias?idCategoria=${idCategoria}`);
         return await res.json();
     } catch (e) {
         console.error('Error cargando subcategorías');
@@ -171,7 +235,7 @@ async function fetchSubCategorias(idCategoria) {
 async function fetchProductos(idSubCategoria) {
     try {
         // Cambié el parámetro de URL para obtener productos según subcategoría
-        const res = await fetch(`http://192.168.24.96:3000/productos?subcategoria_id=${idSubCategoria}`);
+        const res = await fetch(`https://apiostalaritza.lhusurbil.eus/GetProductos?idCategoria=${idSubCategoria}`);
         return await res.json();
     } catch (e) {
         console.error('Error cargando productos');
@@ -222,9 +286,9 @@ function mostrarSubCategorias(subcategorias) {
             const id = e.currentTarget.dataset.subcategoria;
 
             // Llamamos a fetchSubCategorias con el id de la categoría seleccionada
-            const productos = await fetchProductos(id);
-            console.log('productos:', productos);
-            mostrarProductos(productos);
+            const productosJson = await fetchProductos(id);
+            console.log('productos:', productosJson);
+            mostrarProductos(productosJson.productos);
         });
     });
     

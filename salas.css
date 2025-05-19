@@ -123,7 +123,7 @@ h1 {
   height: 100vh;
 }
 
-.plano {
+#plano {
   position: relative;
   width: 900px;
   height: 900px;
@@ -132,8 +132,8 @@ h1 {
   background-color: #2e3138;
   top: 70px;
   border-radius: 20px;
-}
 
+}
 .numero {
   position: absolute;
   background-color: #f9f7f7;
@@ -156,7 +156,6 @@ h1 {
   width: 7%;
   height: 7%;
 }
-
 
 .n7,
 .n8,
@@ -244,7 +243,6 @@ h1 {
   border-radius: 75px;
 }
 
-
 #flechaDerecha {
   position: fixed;
   bottom: 20px;
@@ -253,5 +251,5 @@ h1 {
   cursor: pointer;
   background-color: #ddd;
   border-radius: 75px;
-
 }
+
