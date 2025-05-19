@@ -14,8 +14,8 @@ if (idMesa){
 }
 
 function consultarCapacidad(idMesa) {
-  // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}`;
-  const url = "../Salas_/salas.json"
+  // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
+  const url = "./json/salas.json"
   fetch(url)
     .then(response => {
       if (!response.ok) {
