@@ -1,33 +1,48 @@
 // Mendez
 document.addEventListener('DOMContentLoaded', async () => {
-    const salasData = await getSalas();
-    let index = 0;
-    if (window.location.pathname.endsWith('../sala2.html')) {
-        index = 1;
+    let cont  = 0;
+    async function actualizarMesas() {
+        const salasData = await getSalas();
+        let index = 0;
+        if (window.location.pathname.endsWith('sala2.html')) {
+            index = 1;
+        }
+        const mesasData = await getMesas(salasData.salas[index].idSala);
+        generarMesas(mesasData);
+
+        const mesas = document.querySelectorAll('.mesa');
+        mesas.forEach(mesa => {
+            mesa.addEventListener('click', function() {
+                const idMesa = this.getAttribute('data-id'); 
+                localStorage.setItem('mesaSeleccionada', idMesa);
+                window.location.href = 'info1.html';
+            });
+        });
+        console.log("actualizacion: "+(cont++));
     }
-    generarMesas(salasData.salas[index].mesas);
 
-
-     const mesas = document.querySelectorAll('.mesa');
-     mesas.forEach(mesa => {
-    mesa.addEventListener('click', function() {
-      const idMesa = this.getAttribute('data-id'); 
-      localStorage.setItem('mesaSeleccionada', idMesa);
-     window.location.href = 'info1.html';
-    });
-  });
+    // Llamada inicial
+    await actualizarMesas();
+    // Actualización cada 5 segundos
+    setInterval(actualizarMesas, 5000);
 });
 
 const generarMesas = (mesas) => {
     const container = document.getElementById("plano");
-    const mesasHTML = mesas.map(item =>
-        `<button class="mesa n${item.id}" data-id="${item.id}">${item.id}</button>`
+    const mesasHTML = mesas.mesas.map(item =>
+        `<button class="mesa n${item.numMesa}" data-id="${item.numMesa}">${item.numMesa}</button>`
     ).join('');
     container.innerHTML = mesasHTML;
 }
 
 async function getSalas() {
-    const response = await fetch("./json/salas.json");
+    const response = await fetch("https://apiostalaritza.lhusurbil.eus/GetSalas");
+    const data = await response.json();
+    return data;
+}
+
+async function getMesas(idSala){
+    const response = await fetch(`https://apiostalaritza.lhusurbil.eus/GetMesas?idSala=${idSala}`);
     const data = await response.json();
     return data;
 }
