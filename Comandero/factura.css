@@ -1,4 +1,5 @@
 
+/*estilo de la facura y el subtotal*/
 body {
   font-family: monospace;
   background: #f4f4f4;
@@ -24,6 +25,7 @@ body {
   text-align: center;
   margin-top: auto;
   padding: auto;
+
 }
 
 .bold {
@@ -38,8 +40,45 @@ body {
   padding: 4px 0;
 }
 
-.total, .iva {
+.total, .iva,.infoMesa{
   margin-top: 10px;
-  border-top: 1px dashed #000;
+  border-top: 1px dashed #0a0a0a;
   padding-top: 5px;
+}
+/*Estilo para la comada*/
+
+
+
+
+/*Resposive*/
+@media (max-width: 768px){
+  #ticket {
+    width: 100%;
+    padding: 10px;
+  }
+  .empresa {
+    font-size: 18px;
+  }
+  .section {
+    margin: 5px 0;
+  }
+  .items td {
+    padding: 2px 0;
+  }
+}
+
+@media (max-width: 480px){
+  #ticket {
+    width: 100%;
+    padding: 5px;
+  }
+  .empresa {
+    font-size: 16px;
+  }
+  .section {
+    margin: 3px 0;
+  }
+  .items td {
+    padding: 1px 0;
+  }
 }
