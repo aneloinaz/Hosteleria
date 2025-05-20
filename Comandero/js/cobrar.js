@@ -1,9 +1,17 @@
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarPedidoEnCobrar();
+    mostrarTotalEnCobrar();
+    cancelarPago();
+    PagoEfectivo();
+    PagoTarjeta();
+    
+});
+
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
-    const params = new URLSearchParams(window.location.search);
-    const idComanda = localStorage.getItem('idComanda') || '1'; // Toma el idComanda del localStorage
+    const idComanda = localStorage.getItem('idComanda') || '1';
     const url = `https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`;
 
     fetch(url)
@@ -12,7 +20,7 @@ function mostrarPedidoEnCobrar() {
             return response.text();
         })
         .then(text => {
-            const pedido = JSON.parse(text); 
+            const pedido = JSON.parse(text);
 
             if (!pedido.detalleComandas || pedido.detalleComandas.length === 0) {
                 lista.innerHTML = '<li>No hay productos en el pedido.</li>';
@@ -30,7 +38,7 @@ function mostrarPedidoEnCobrar() {
 
             localStorage.setItem('pedido', JSON.stringify(pedidoLocal));
             mostrarTotalEnCobrar();
-           
+
         })
         .catch(error => {
             console.error('Error al obtener el pedido:', error);
@@ -49,8 +57,9 @@ function mostrarTotalEnCobrar() {
     }
 
     totalSpan.textContent = total.toFixed(2);
-
 }
+
+
 
    function cancelarPago() {
     if (confirm('¿Estás seguro de cancelar la operació?')) {
@@ -64,26 +73,29 @@ function mostrarTotalEnCobrar() {
 
 function PagoTarjeta() {
     alert('La operación se ha realizado con éxito');
-    window.location.href = 'salas1.html';
     const mesaId = localStorage.getItem('mesaSeleccionada');
     localStorage.removeItem(`pedido_mesa_${mesaId}`);
-    window.location.href = 'salas1.html';
+    window.location.href = '/Comandero/html/factura.html';
 }
 
 function PagoEfectivo() {
-    let total = totalTicket(); // Obtener el total desde la función totalTicket()
+    const pedidoGuardado = localStorage.getItem("pedido");
+    let total = 0;
+    if (pedidoGuardado) {
+        const pedido = JSON.parse(pedidoGuardado);
+        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+    }
     let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
+    if (isNaN(recibido)) {
+        alert('Por favor, ingrese una cantidad válida.');
+        return;
+    }
     let cambio = recibido - total;
 
     if (cambio === 0) {
         alert('Importe exacto.');
-        const mesaId = localStorage.getItem('mesaSeleccionada');
-        localStorage.removeItem(`pedido_mesa_${mesaId}`);
-        window.location.href = 'salas1.html';
     } else if (cambio > 0) {
         alert(`Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`);
-        const mesaId = localStorage.getItem('mesaSeleccionada');
-        localStorage.removeItem(`pedido_mesa_${mesaId}`);
-        window.location.href = 'salas1.html';
+        window.location.href = 'factura.html';
     }
-}
+  }

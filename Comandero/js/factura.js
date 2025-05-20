@@ -98,7 +98,7 @@ function mostrarFechaYHora() {
 
 function mostrarInfoExtra() {
     const salaMesa = localStorage.getItem('salaMesa') || '1 - A';
-    const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
+    const formaPago = localStorage.getItem('formaPago') || 'Pago en tarjeta';
     document.getElementById('sala-mesa').textContent = salaMesa;
     document.getElementById('forma-pago').textContent = formaPago;
 }
