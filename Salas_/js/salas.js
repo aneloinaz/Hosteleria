@@ -1,5 +1,4 @@
 import { actualizarEstado } from "./mesasEstado.js";
-
 document.addEventListener('DOMContentLoaded', async () => {
     let cont  = 0;
     async function actualizarMesas() {
@@ -10,15 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const mesasData = await getMesas(salasData.salas[index].idSala);
         generarMesas(mesasData);
-
-        const mesas = document.querySelectorAll('.mesa');
-        mesas.forEach(mesa => {
-            mesa.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                window.location.href = 'info1.html';
-            });
-        });
 
         await actualizarEstado();
         console.log("actualizacion: "+(cont++));
