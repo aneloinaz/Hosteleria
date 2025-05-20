@@ -5,7 +5,7 @@ export async function actualizarEstado(){
 
     Array.from(mesas).forEach(mesa => {
         const ID = parseInt(mesa.dataset.id);
-        const mesaEstado = estados.find(m => m.idMesa === ID);
+        const mesaEstado = estados.estados.find(m => m.idMesa === ID);
         if (mesaEstado) {
             cambiarColorMesa(mesa, mesaEstado.estado);
         }
@@ -14,7 +14,8 @@ export async function actualizarEstado(){
 
 async function cargarEstadosDesdeJSON() {
     try {
-        const response = await fetch('./json/mesasEstados.json');  // const response = await fetch('https://apiostalaritza.lhusurbil.eus/GetmesasEsado?idMesa=${idMesa}'); 
+      const fecha = new Date().toISOString().slice(0.10);
+        const response = await fetch(`https://apiostalaritza.lhusurbil.eus/GetEstadoMesas?fecha=${fecha}`);  // const response = await fetch('https://apiostalaritza.lhusurbil.eus/GetmesasEsado?idMesa=${idMesa}'); 
         const data = await response.json();
         return data;
     } catch (error) {
