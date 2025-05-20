@@ -135,16 +135,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             console.log('[ENVIAR] productosEnviados:', productosEnviados);
 
-            // --- Filtrar solo los productos nuevos ---
+            // --- Filtrar solo los productos válidos ---
             const detalles = pedido
                 .filter(producto => {
-                    // Validar que id y cantidad sean números válidos y no nulos
                     const id = Number(producto.id);
                     const cantidad = Number(producto.cantidad);
+                    // Solo agrega si id y cantidad son válidos y positivos
                     return (
-                        !productosEnviados.includes(id) &&
-                        id && !isNaN(id) &&
-                        cantidad && !isNaN(cantidad)
+                        !isNaN(id) &&
+                        !isNaN(cantidad) &&
+                        id > 0 &&
+                        cantidad > 0
                     );
                 })
                 .map(producto => ({
@@ -401,6 +402,8 @@ export async function pintarPedidoUlConEstado() {
     if (!lista) return;
     lista.innerHTML = '';
 
+    let total = 0;
+
     // Siempre muestra los productos enviados (en verde)
     Object.entries(enviadosAgrupados).forEach(([id, prod]) => {
         const cantidad = Number(prod.cantidad) || 0;
@@ -409,6 +412,7 @@ export async function pintarPedidoUlConEstado() {
         li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
         li.classList.add('producto-enviado');
         lista.appendChild(li);
+        total += cantidad * precio;
     });
 
     // Luego muestra los productos pendientes (en naranja)
@@ -420,5 +424,12 @@ export async function pintarPedidoUlConEstado() {
         li.textContent = `${producto.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
         li.classList.add('producto-noenviado');
         lista.appendChild(li);
+        total += cantidad * precio;
     });
+
+    // Mostrar el total en el DOM
+    const totalSpan = document.querySelector('.total span');
+    if (totalSpan) {
+        totalSpan.textContent = `${total.toFixed(2)}€`;
+    }
 }
