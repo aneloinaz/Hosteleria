@@ -6,12 +6,12 @@ const botonAceptar = document.querySelector('.boton-aceptar');
 /* aqui va la llamada a la api para que devuelva la capacidad de la mesa segun su idMesa*/
 
 
-if (idMesa){
-  consultarCapacidad(idMesa)
-}else {
-  console.error('No se selecciono ninguna mesa');
-  alert('No se selecciono ninguna mesa');
-}
+// if (idMesa){
+//   consultarCapacidad(idMesa)
+// }else {
+//   console.error('No se selecciono ninguna mesa');
+//   alert('No se selecciono ninguna mesa');
+// }
 
 // function consultarCapacidad(idMesa) {
 //   // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
