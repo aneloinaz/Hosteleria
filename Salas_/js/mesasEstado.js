@@ -1,6 +1,5 @@
 export async function actualizarEstado(){
       const fecha = new Date().toISOString().slice(0,10);
-
   const mesas = document.getElementsByClassName("mesa");
 
     const estados = await cargarEstadosDesdeJSON(fecha);
@@ -56,8 +55,6 @@ function cambiarColorMesa(mesaElemento, estado) {
   
 
 }
-
-
 
 async function actualizarContador(fecha){
   const data = await getComensalesMesa(fecha);
