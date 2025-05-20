@@ -12,7 +12,7 @@ function mostrarPedidoEnCobrar() {
             return response.text();
         })
         .then(text => {
-            const pedido = JSON.parse(text);
+            const pedido = JSON.parse(text); 
 
             if (!pedido.detalleComandas || pedido.detalleComandas.length === 0) {
                 lista.innerHTML = '<li>No hay productos en el pedido.</li>';
