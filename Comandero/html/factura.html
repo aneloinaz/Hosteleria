@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/Comandero/css/factura.css" />
+  <link rel="stylesheet" href="/Comandero/css/factura.css" />
   <title>Ticket de compra</title>
 </head>
 <body>
   <main>
+    <!--esta seccion es la info de la mesa -->
     <div id="ticket">
-     <!-- Aquí se mostrará la información de la empresa -->
       <div class="empresa">CIFP Usurbil LHII</div>
       <div class="datosEmpesa">
         Etarte bidea<br />
@@ -17,40 +17,33 @@
         Zubieta-Usurbil<br />
         20170<br />
         943364600
+      </div> 
+      <!--esta seccion es la info de la mesa -->
+      <div class="infoMesa">
+        <div class="section bold">FACTURA SIMPLIFICADA</div>
+        <div class="section" id="fecha-hora"></div>
+        <div class="section">Sala-Mesa:</div>
+        <div class="section" id="sala-mesa"></div>
+        <div class="section">Número de comensales:</div>
+        <div class="section" id="comensales"></div>
+        <div class="section">Media x comensal: <span id="mediaxComensal">0.00</span> €</div>
       </div>
-    <div class="infoMesa">
-      <div class="section bold">FACTURA SIMPLIFICADA</div>
-        <div class="section">
-            <div class="section" id="fecha-hora"></div>
-            <div class="section">Sala-Mesa:</div>
-            <div class="section" id="sala-mesa"></div>
-            <div class="section">Número de comensales:</div>
-            <div class="section" id="comensales"></div>
-            <div class="section">Media x comensal: <span id="mediaxComensal">0.00</span> €</div>
-    </div>
-
+      <!--esta seccion del resumen del pedido con el total -->
       <div class="total">
-        <!--esta parte es donde esta el resumene de pedido-->
-        <div class="section">
-            <ul id="listaCobro"></ul>
-        </div>
-        <!-- Aquí es la parte del total -->
+        <ul id="listaCobro"></ul>
         <div class="section">TOTAL</div>
         <div class="section"><span id="total">0.00</span> €</div>
       </div>
-        <div class="section">
-        <div class="section" id="forma-pago"></div>
-        <!-- Aquí se mostrará los impuestos -->
-        <div>Impuestos incluidos</div>
-        <div class="iva">
+      <!--esta seccion del pago, con los impuestos y el QR -->
+      <div class="section" id="forma-pago"></div>
+      <div>Impuestos incluidos</div>
+      <div class="iva">
         <div>IVA 10% - Base: <span id="base-iva">0.00</span> € Cuota <span id="cuota-iva">0.00</span> €</div>
       </div>
       <div id="contenedorQR" class="section"></div>
     </div>
-</div>
     <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir Ticket</button>
   </main>
-<script src="/Comandero/js/factura.js"></script>
-
+  <script src="/Comandero/js/factura.js"></script>
 </body>
 </html>

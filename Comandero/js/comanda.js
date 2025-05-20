@@ -1,0 +1,1 @@
+// cuando cierro la comanda me tiene que llevar a las salas.

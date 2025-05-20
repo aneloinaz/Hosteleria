@@ -31,32 +31,25 @@
             <div class="section">Media x comensal: <span id="mediaxComensal">0.00</span> €</div>
     </div>
     </div>
-
-            
-              
-             
-         <div class="total">
-        <!--esta parte es donde esta el resumene de pedido-->
-        <div class="section">
-            <ul id="listaCobro"></ul>
-        </div>
-        <!-- Aquí es la parte del total -->
+         <!--esta seccion del resumen del pedido con el total -->
+      <div class="total">
+        <ul id="listaCobro"></ul>
         <div class="section">TOTAL</div>
         <div class="section"><span id="total">0.00</span> €</div>
       </div>
-        <div class="section">
-        <div class="section" id="forma-pago"></div>
-        <!-- Aquí se mostrará los impuestos -->
-        <div>Impuestos incluidos</div>
-        <div class="iva">
+      <!--esta seccion del pago, con los impuestos y el QR -->
+      <div class="section" id="forma-pago"></div>
+      <div>Impuestos incluidos</div>
+      <div class="iva" class="section">
         <div>IVA 10% - Base: <span id="base-iva">0.00</span> € Cuota <span id="cuota-iva">0.00</span> €</div>
       </div>
+    </div>
   
 </div>
-        <button id="boton-imprimir" onclick="imprimirTicket()">Imprimir</button> 
+        <button id="boton-imprimir" onclick="imprimirSub()">Imprimir</button> 
     </main>
     <script src="/Comandero/js/cobrar.js"></script>
-    <script src="/Comandero/js/factura.js"></script>
+    <script src="/Comandero/js/subtotal.js"></script>
     
 </body>
 </html>
