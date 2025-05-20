@@ -73,14 +73,13 @@ aside{
 
 .cantidad {
   background-color: #6EE7B7;
-  color: #1F2937;
+  color: hsl(215, 28%, 17%);
   padding: 6px 14px;
   border-radius: 20px;
   font-weight: bold;
   font-family: sans-serif;
   display: inline-block;
-  width: 90px;
-  height: 30px;
+  height: 60px;
   font-size: 20px;
   text-align: center;
 }
@@ -108,6 +107,11 @@ aside{
   width: 5rem;
   height: 5rem;
   text-align: center;
+  cursor:pointer;
+}
+.mesa:hover{
+  transform:scale(1.08);
+  border:2px solid #ffffff;
 }
 .n1{
   grid-area: n1;

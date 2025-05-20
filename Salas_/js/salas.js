@@ -1,6 +1,6 @@
 import { actualizarEstado } from "./mesasEstado.js";
-
 document.addEventListener('DOMContentLoaded', async () => {
+    localStorage.clear();
     let cont  = 0;
     async function actualizarMesas() {
         const salasData = await getSalas();
@@ -11,15 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const mesasData = await getMesas(salasData.salas[index].idSala);
         generarMesas(mesasData);
 
-        const mesas = document.querySelectorAll('.mesa');
-        mesas.forEach(mesa => {
-            mesa.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                window.location.href = 'info1.html';
-            });
-        });
-
         await actualizarEstado();
         console.log("actualizacion: "+(cont++));
     }
@@ -27,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Llamada inicial
     await actualizarMesas();
     // Actualización cada 5 segundos
-    setInterval(actualizarMesas, 5000);
+    setInterval(actualizarEstado, 5000);
 });
 
 const generarMesas = (mesas) => {
@@ -60,3 +51,4 @@ async function getMesas(idSala){
 // 1 reservado 
 // 2 comanda pedia
 // 3 finalizado
+
