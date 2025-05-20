@@ -30,7 +30,7 @@ function mostrarPedidoEnCobrar() {
 
             localStorage.setItem('pedido', JSON.stringify(pedidoLocal));
             mostrarTotalEnCobrar();
-            generarQR();
+            
         })
         .catch(error => {
             console.error('Error al obtener el pedido:', error);
@@ -75,7 +75,7 @@ function calcularMediaxComensal() {
     document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
 }
 
-function imprimirTicket() {
+function imprimirSub() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
     ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
@@ -85,14 +85,12 @@ function imprimirTicket() {
     ventanaImpresion.print();
     ventanaImpresion.close();
     alert('El ticket se ha impreso correctamente');
-    window.location.href = '/Salas_/sala1.html';
+    window.location.href = '/Comandero/html/factura.html';
 }
-
-
 
 function mostrarFechaYHora() {
     const ahora = new Date();
-    const formato = ahora.toLocaleString('es-ES');
+    const formato = ahora.toLocaleString();
     document.getElementById('fecha-hora').textContent = formato;
 }
 
@@ -101,19 +99,6 @@ function mostrarInfoExtra() {
     const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
     document.getElementById('sala-mesa').textContent = salaMesa;
     document.getElementById('forma-pago').textContent = formaPago;
-}
-
-function generarQR() {
-    const total = document.getElementById('total').textContent;
-    const textoQR = `Total factura: ${total} €`;
-    const urlQR = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(textoQR)}&size=150x150`;
-
-    const contenedorQR = document.getElementById('contenedorQR');
-    contenedorQR.innerHTML = '';
-    const imgQR = document.createElement('img');
-    imgQR.src = urlQR;
-    imgQR.alt = 'Código QR del total';
-    contenedorQR.appendChild(imgQR);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
