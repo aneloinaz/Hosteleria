@@ -67,5 +67,5 @@ botonAceptar.addEventListener('click', function() {
   }
      */
   localStorage.setItem('comensalesMesa', cantidadIngresada);
-  window.location.href = '../Comandero/menu.html';
+  window.location.href = '../Comandero/html/menu.html';
 });
