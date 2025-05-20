@@ -39,8 +39,7 @@ body {
   padding: 4px 0;
 }
 
-.total,
-.iva {
+.total,.iva,.infoMesa {
   margin-top: 10px;
   border-top: 1px dashed #000;
   padding-top: 5px;
