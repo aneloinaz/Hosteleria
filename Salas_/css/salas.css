@@ -78,11 +78,11 @@ aside{
   border-radius: 20px;
   font-weight: bold;
   font-family: sans-serif;
-  display: inline-block;
-  width: 90px;
-  height: 30px;
+  height: 60px;
   font-size: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* sala1*/
