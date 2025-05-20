@@ -137,7 +137,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // --- Filtrar solo los productos nuevos ---
             const detalles = pedido
-                .filter(producto => !productosEnviados.includes(Number(producto.id)))
+                .filter(producto => {
+                    // Validar que id y cantidad sean números válidos y no nulos
+                    const id = Number(producto.id);
+                    const cantidad = Number(producto.cantidad);
+                    return (
+                        !productosEnviados.includes(id) &&
+                        id && !isNaN(id) &&
+                        cantidad && !isNaN(cantidad)
+                    );
+                })
                 .map(producto => ({
                     idComanda: Number(idComanda),
                     idProducto: Number(producto.id),
