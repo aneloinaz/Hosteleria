@@ -45,6 +45,7 @@ async function actualizarContador(fecha){
   let comensales = 0;
   data.mesas.forEach(mesa =>{
     comensales=+ mesa.numComensales;
+    console.log("Num Mesa: "+mesa.numMesa + "comensales: " + mesa.numComensales);
   });
   
   document.getElementById("contador").textContent = comensales;

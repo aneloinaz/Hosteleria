@@ -60,3 +60,4 @@ async function getMesas(idSala){
 // 1 reservado 
 // 2 comanda pedia
 // 3 finalizado
+
