@@ -13,41 +13,41 @@ if (idMesa){
   alert('No se selecciono ninguna mesa');
 }
 
-function consultarCapacidad(idMesa) {
-  // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
-  const url = "./json/salas.json";
-  fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Error de red: ' + response.status);
-      }
-      return response.json();
-    })
-    .then(data => {
-      //Se modifica para que se ajuste al json de prueba
-      // Buscar la mesa por id en todas las salas
-      let capacidad = null;
-      for (const sala of data.salas) {
-        const mesa = sala.mesas.find(m => m.id == idMesa);
-        if (mesa) {
-          capacidad = mesa.capacidad;
-          break;
-        }
-      }
-      if (capacidad !== null) {
-        console.log(`Capacidad de la mesa ${idMesa}:`, capacidad);
-        numeroSpan.textContent = capacidad;
-      } else {
-        console.error('No se encontró la mesa con id', idMesa);
-        alert('No se encontró la mesa seleccionada.');
-      }
-    })
-    .catch(error=>{
-      console.error('Error al consultar la capacidad de la mesa ;', error);
-      alert('Error al consultar la capacidad de la mesa. Por favor, vuelve a intentarlo mas tarde.')
+// function consultarCapacidad(idMesa) {
+//   // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
+//   const url = "./json/salas.json";
+//   fetch(url)
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error('Error de red: ' + response.status);
+//       }
+//       return response.json();
+//     })
+//     .then(data => {
+//       //Se modifica para que se ajuste al json de prueba
+//       // Buscar la mesa por id en todas las salas
+//       let capacidad = null;
+//       for (const sala of data.salas) {
+//         const mesa = sala.mesas.find(m => m.id == idMesa);
+//         if (mesa) {
+//           capacidad = mesa.capacidad;
+//           break;
+//         }
+//       }
+//       if (capacidad !== null) {
+//         console.log(`Capacidad de la mesa ${idMesa}:`, capacidad);
+//         numeroSpan.textContent = capacidad;
+//       } else {
+//         console.error('No se encontró la mesa con id', idMesa);
+//         alert('No se encontró la mesa seleccionada.');
+//       }
+//     })
+//     .catch(error=>{
+//       console.error('Error al consultar la capacidad de la mesa ;', error);
+//       alert('Error al consultar la capacidad de la mesa. Por favor, vuelve a intentarlo mas tarde.')
 
-    })
-  }
+//     })
+//   }
 
 
 
