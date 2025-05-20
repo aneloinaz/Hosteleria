@@ -1,7 +1,10 @@
 export async function actualizarEstado(){
+      const fecha = new Date().toISOString().slice(0,10);
+
   const mesas = document.getElementsByClassName("mesa");
 
-    const estados = await cargarEstadosDesdeJSON();
+    const estados = await cargarEstadosDesdeJSON(fecha);
+    actualizarContador(fecha);
 
     Array.from(mesas).forEach(mesa => {
         const ID = parseInt(mesa.dataset.id);
@@ -12,9 +15,8 @@ export async function actualizarEstado(){
     });
 }
 
-async function cargarEstadosDesdeJSON() {
+async function cargarEstadosDesdeJSON(fecha) {
     try {
-      const fecha = new Date().toISOString().slice(0.10);
         const response = await fetch(`https://apiostalaritza.lhusurbil.eus/GetEstadoMesas?fecha=${fecha}`);  // const response = await fetch('https://apiostalaritza.lhusurbil.eus/GetmesasEsado?idMesa=${idMesa}'); 
         const data = await response.json();
         return data;
@@ -34,4 +36,26 @@ function cambiarColorMesa(mesaElemento, estado) {
    } else if (estado==3) {
      mesaElemento.style.backgroundColor = "blue"; // Finalizado
    }
+}
+
+
+
+async function actualizarContador(fecha){
+  const data = await getComensalesMesa(fecha);
+  let comensales = 0;
+  data.mesas.forEach(mesa =>{
+    comensales=+ mesa.numComensales;
+  });
+  
+  document.getElementById("contador").textContent = comensales;
+}
+
+async function getComensalesMesa(fecha){
+  try{
+    const response = await fetch(`https://apiostalaritza.lhusurbil.eus/GetMesasOcupadasFecha?fecha=${fecha}`);
+    const data = await response.json();
+    return data;
+  }catch(e){
+    console.error("Error al hacer la peticion: "+e);
+  }
 }
