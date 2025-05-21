@@ -435,8 +435,9 @@ export async function pintarPedidoUlConEstado() {
 
     // 3. Mostrar la lista de productos del pedido actual (pendientes)
     const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+     console.log("Este es el array de pedido: "+pedidoGuardado);
     const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
-
+   
     const lista = document.querySelector('.pedido-ul');
     if (!lista) return;
     lista.innerHTML = '';

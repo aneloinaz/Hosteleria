@@ -1,12 +1,14 @@
+
+
+import { AlertMessage } from "../../components/AlertComponents.js";
+import { AlertConfirm } from "../../components/AlertComponents.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     mostrarPedidoEnCobrar();
     mostrarTotalEnCobrar();
     
     
 });
-
-import { AlertMessage } from "../../components/AlertComponents.js";
-import { AlertConfirm } from "../../components/AlertComponents.js";
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
