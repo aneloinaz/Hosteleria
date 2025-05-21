@@ -85,6 +85,25 @@ aside{
   align-items: center;
 }
 
+.btnRes{
+   background-color: #6EE7B7;
+  color: hsl(215, 28%, 17%);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-family: sans-serif;
+  height: 60px;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+
+
+
+
 /* sala1*/
 .sala1 {
   background: #0b041f;
