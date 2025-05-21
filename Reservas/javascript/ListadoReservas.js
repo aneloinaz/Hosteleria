@@ -15,10 +15,10 @@
             <td>${reserva.fecha}</td>
             <td>${reserva.mesa}</td>
             <td>${reserva.hora}</td>
-            <td>${reserva.nombre}</td>
-            <td>${reserva.apellido}</td>
-            <td>${reserva.telefono}</td>
-            <td>${reserva.comensales}</td>
+            <td>${reserva.nombreCliente}</td>
+            <td>${reserva.apellidoCliente}</td>
+            <td>${reserva.telefonoCliente}</td>
+            <td>${reserva.numComensales}</td>
          
           `;
           tbody.appendChild(fila);
