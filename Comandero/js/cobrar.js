@@ -1,9 +1,11 @@
-
-
 import { AlertMessage } from "../../components/AlertComponents.js";
 import { AlertConfirm } from "../../components/AlertComponents.js";
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("boton-tarjeta").addEventListener('click',PagoTarjeta);
+    document.getElementById("boton-efectivo").addEventListener('click',PagoEfectivo);
+    document.getElementById("boton-cancelar").addEventListener('click',async ()=>{cancelarPago()});
+
     mostrarPedidoEnCobrar();
     mostrarTotalEnCobrar();
 });
@@ -55,13 +57,11 @@ function mostrarTotalEnCobrar() {
 }
 
 
-   function cancelarPago() {
-    message = '¿Estás seguro de cancelar la operació?';
-    redirection = "./menu.html";
-    if (AlertConfirm(message,redirection)) {
+   async function cancelarPago() {
+    let message = '¿Aceptas anular la operación?';
+    if ( await AlertConfirm(message)) {
         localStorage.removeItem('pedido'); 
-        resumenTicket(); 
-        window.location.href = 'Comandero/html/sala1.html';
+        window.location.href = './menu.html';
     } else {
         message = 'Operacion cancelada';
         AlertMessage(message);
@@ -69,8 +69,8 @@ function mostrarTotalEnCobrar() {
 }
 
 function PagoTarjeta() {
-    message = 'La operación se ha realizado con éxito';
-    redirection = '../../Salas_/sala1.html';
+    let message = 'La operación se ha realizado con éxito';
+    let redirection = '../../Salas_/sala1.html';
     AlertMessage(message,redirection);
     //al llegar a salas el localStorage se borra automaticamente
     // const mesaId = localStorage.getItem('mesaSeleccionada');
@@ -93,18 +93,18 @@ function PagoEfectivo() {
     let cambio = recibido - total;
 
     if (cambio === 0) {
-        message = 'Importe Exacto';
-        redirection = '../../Salas_/sala1.html';
+        let message = 'Importe Exacto';
+        let redirection = '../../Salas_/sala1.html';
         //al llegar a salas se borra todo automaticamente
         // const mesaId = localStorage.getItem('mesaSeleccionada');
-        // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        // localStorage.removeItem(`pedido_mesa_${mesaId}');
 
         AlertMessage(message,redirection);
         
         window.location.href = 'salas1.html';
     } else if (cambio > 0) {
-        message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
-        redirection = '../../Salas_/sala1.html';
+        let message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
+        let redirection = '../../Salas_/sala1.html';
         
         //al llegar a salas se borra todo automaticamente
         // const mesaId = localStorage.getItem('mesaSeleccionada');
@@ -112,6 +112,5 @@ function PagoEfectivo() {
         // window.location.href = 'salas1.html';
 
         AlertMessage(message,redirection);
-     
     }
-  }
+}
