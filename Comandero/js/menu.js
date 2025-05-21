@@ -1,6 +1,10 @@
 import { handlerProductos } from "./pedido.js";
+import { AlertMessage } from "../../components/AlertComponents.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
+    let message=null;
+    let redirection=null;
+
     // meter manualmente la mesa
     const mesa = 1;
     const comensales = 4;
@@ -16,8 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     if (!datosMesa) {
-        alert('No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.');
-        window.location.href = 'index.html';
+        message = 'No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.';
+        redirection = "../../Salas_/sala1.html";
+        AlertMessage(message,redirection);
     }
 
     //
@@ -55,7 +60,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('[ENVIAR] mesaId:', mesaId);
 
                 if (!mesaId) {
-                    alert('No se ha seleccionado ninguna mesa.');
+                        message = 'No se ha seleccionado ninguna mesa.';
+                        redirection = "../../Salas_/sala1.html";
+                        AlertMessage(message,redirection);
                     return;
                 }
 
@@ -63,7 +70,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('[ENVIAR] pedidoGuardado:', pedidoGuardado);
 
                 if (!pedidoGuardado) {
-                    alert('No hay productos en el pedido.');
+                    message = 'No hay productos en el pedido.';
+                    AlertMessage(message);
                     return;
                 }
                 const pedido = JSON.parse(pedidoGuardado);
@@ -134,7 +142,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('[ENVIAR] idComanda final:', idComanda);
 
                 if (!idComanda) {
-                    alert('No se pudo obtener el id de la comanda.');
+                     message = 'No se pudo obtener el id de la comanda.';
+                     AlertMessage(message);
                     return;
                 }
                 localStorage.setItem('idComanda', idComanda);
@@ -177,7 +186,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('[ENVIAR] detalles a enviar:', detalles);
 
                 if (detalles.length === 0) {
-                    alert('No hay productos nuevos para enviar.');
+                    message = 'No hay productos nuevos para enviar.';
+                     AlertMessage(message);
+                    
                     return;
                 }
 
@@ -201,14 +212,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('[ENVIAR] Respuesta detalle:', dataDetalle);
 
                 if (!resDetalle.ok || dataDetalle.ok === false) {
-                    alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+                    message = 'Error al insertar detalle de comanda: ' + (dataDetalle.status || '');
+                    AlertMessage(message);
                     return;
                 }
 
-                alert('Comanda enviada correctamente');
+                message = 'Comanda enviada correctamente';
+                redirection = '../../Salas_/sala1.html';
+                AlertMessage(message, redirection);
                 // Limpia el pedido y vuelve a la sala
-                localStorage.removeItem(`pedido_mesa_${mesaId}`);
-                window.location.href = '../../Salas_/sala1.html';
+                // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+                // window.location.href = '../../Salas_/sala1.html';
             } finally {
                 btnEnviar.textContent = 'Enviar';
                 btnEnviar.disabled = false;
@@ -373,7 +387,8 @@ async function insertarDetalleComanda(idComanda, producto) {
     console.log('Respuesta detalle:', dataDetalle);
 
     if (!resDetalle.ok || dataDetalle.ok === false) {
-        alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+        message = 'Error al insertar detalle de comanda: ' + (dataDetalle.status || '');
+        AlertMessage(message);
         return false;
     }
     return true;

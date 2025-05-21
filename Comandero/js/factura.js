@@ -1,3 +1,4 @@
+import { AlertMessage } from "../../components/AlertComponents.js";
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
@@ -84,8 +85,9 @@ function imprimirTicket() {
     ventanaImpresion.document.close();
     ventanaImpresion.print();
     ventanaImpresion.close();
-    alert('El ticket se ha impreso correctamente');
-    window.location.href = '/Salas_/sala1.html';
+    message = 'El ticket se ha impreso correctamente';
+    redirection = "../../Salas_/sala1.html";
+    AlertMessage(message,redirection);
 }
 
 
