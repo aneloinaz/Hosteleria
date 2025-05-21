@@ -9,34 +9,23 @@ function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
-    const idComanda = localStorage.getItem('idComanda') || '1';
-    const url = `https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`;
-
-    fetch(url)
+    fetch("https://apiostalaritza.lhusurbil.eus/api/GetDetallePedido") // ← URL real de la API, sin "swagger/index.html"
         .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.text();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
         })
-        .then(text => {
-            const pedido = JSON.parse(text);
-
-            if (!pedido.detalleComandas || pedido.detalleComandas.length === 0) {
+        .then(pedido => {
+            if (!pedido || pedido.length === 0) {
                 lista.innerHTML = '<li>No hay productos en el pedido.</li>';
                 return;
             }
-
-            let pedidoLocal = [];
-
-            pedido.detalleComandas.forEach(item => {
+            pedido.forEach(item => {
                 const li = document.createElement('li');
                 li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
                 lista.appendChild(li);
-                pedidoLocal.push(item);
             });
-
-            localStorage.setItem('pedido', JSON.stringify(pedidoLocal));
-            mostrarTotalEnCobrar();
-
         })
         .catch(error => {
             console.error('Error al obtener el pedido:', error);
@@ -44,15 +33,16 @@ function mostrarPedidoEnCobrar() {
         });
 }
 
-function mostrarTotalEnCobrar() {
-    const pedidoGuardado = localStorage.getItem('pedido');
-    const totalSpan = document.getElementById('total');
-    let total = 0;
 
-    if (pedidoGuardado) {
+    function mostrarTotalEnCobrar() {
+      const pedidoGuardado = localStorage.getItem("pedido");
+      const totalSpan = document.getElementById("total");
+      let total = 0;
+
+      if (pedidoGuardado) {
         const pedido = JSON.parse(pedidoGuardado);
         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    }
+      }
 
     totalSpan.textContent = total.toFixed(2);
 }
@@ -75,23 +65,19 @@ function PagoTarjeta() {
 }
 
 function PagoEfectivo() {
-    const pedidoGuardado = localStorage.getItem("pedido");
-    let total = 0;
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    }
+    let total = totalTicket(); // Obtener el total desde la función totalTicket()
     let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
-    if (isNaN(recibido)) {
-        alert('Por favor, ingrese una cantidad válida.');
-        return;
-    }
     let cambio = recibido - total;
 
     if (cambio === 0) {
         alert('Importe exacto.');
+        const mesaId = localStorage.getItem('mesaSeleccionada');
+        localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        window.location.href = 'salas1.html';
     } else if (cambio > 0) {
         alert(`Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`);
-        window.location.href = 'factura.html';
+        const mesaId = localStorage.getItem('mesaSeleccionada');
+        localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        window.location.href = 'salas1.html';
     }
-  }
+}
