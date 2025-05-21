@@ -28,10 +28,7 @@ export async function actualizarEstado(){
 function cambiarColorMesa(mesaElemento, estado) {
    if (estado==0) {
      mesaElemento.style.backgroundColor = "green"; // Libre
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = 'info1.html'});
+
    } else if (estado==1) {
      mesaElemento.style.backgroundColor = "red"; // Reservado
      mesaElemento.addEventListener('click', function() {
@@ -46,14 +43,7 @@ function cambiarColorMesa(mesaElemento, estado) {
                  window.location.href = '../Comandero/html/menu.html'});
    } else if (estado==3) {
      mesaElemento.style.backgroundColor = "blue"; // Finalizado
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   }
-
-  
-
+}
 }
 
 async function actualizarContador(fecha){
