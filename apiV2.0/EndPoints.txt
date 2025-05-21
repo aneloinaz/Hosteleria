@@ -1,3 +1,0 @@
-Pedir Categorías:   http://192.168.24.96:3000/categorias
-Pedir SubCategoías  http://192.168.24.96:3000/subcategorias?categoria_id=1
-Pedir Productos:    http://192.168.24.96:3000/productos?subcategoria_id=6
