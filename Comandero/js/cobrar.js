@@ -9,34 +9,39 @@ function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
-    const mesaId = localStorage.getItem('mesaSeleccionada');
-    if (!mesaId) {
-        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
-        return;
-    }
+    const idComanda = localStorage.getItem('idComanda') || '1';
+    const url = `https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`;
 
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    if (!pedidoGuardado) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
-    }
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.text();
+        })
+        .then(text => {
+            const pedido = JSON.parse(text);
 
-    const pedido = JSON.parse(pedidoGuardado);
-    if (pedido.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
-    }
+            if (!pedido.detalleComandas || pedido.detalleComandas.length === 0) {
+                lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+                return;
+            }
 
-    pedido.forEach(item => {
-        const li = document.createElement('li');
-        const subtotal = (item.precio * item.cantidad).toFixed(2);
-        li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
-        lista.appendChild(li);
-    });
+            let pedidoLocal = [];
 
-    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
-    mostrarTotalEnCobrar();
+            pedido.detalleComandas.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
+                lista.appendChild(li);
+                pedidoLocal.push(item);
+            });
 
+            localStorage.setItem('pedido', JSON.stringify(pedidoLocal));
+            mostrarTotalEnCobrar();
+
+        })
+        .catch(error => {
+            console.error('Error al obtener el pedido:', error);
+            lista.innerHTML = '<li>Error al cargar el pedido.</li>';
+        });
 }
 
 
