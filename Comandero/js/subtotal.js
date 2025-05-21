@@ -78,8 +78,8 @@ function imprimirSub() {
     ventanaImpresion.document.close();
     ventanaImpresion.print();
     ventanaImpresion.close();
-    message = 'El ticket se ha impreso correctamente';
-    redirection = "../../Salas_/sala1.html";
+    let message = 'El ticket se ha impreso correctamente';
+    let redirection = "../../Salas_/sala1.html";
     AlertMessage(message,redirection);
 }
 
