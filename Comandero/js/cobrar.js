@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     mostrarPedidoEnCobrar();
     mostrarTotalEnCobrar();
-    cancelarPago();
-    PagoEfectivo();
-    PagoTarjeta();
+    
     
 });
 
@@ -60,22 +58,20 @@ function mostrarTotalEnCobrar() {
 }
 
 
-
    function cancelarPago() {
     if (confirm('¿Estás seguro de cancelar la operació?')) {
         localStorage.removeItem('pedido'); 
         resumenTicket(); 
-        window.location.href = 'Comandero/menu.html';
+        window.location.href = 'Comandero/html/sala1.html';
     } else {
         alert('Operacion cancelada');
+      
     }
 }
 
 function PagoTarjeta() {
     alert('La operación se ha realizado con éxito');
-    const mesaId = localStorage.getItem('mesaSeleccionada');
-    localStorage.removeItem(`pedido_mesa_${mesaId}`);
-    window.location.href = '/Comandero/html/factura.html';
+    window.location.href = 'factura.html';
 }
 
 function PagoEfectivo() {
