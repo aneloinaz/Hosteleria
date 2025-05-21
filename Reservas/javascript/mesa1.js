@@ -15,7 +15,7 @@ if (idMesa){
 
 function consultarCapacidad(idMesa) {
   // const url = `https://apiostalaritza.lhusurbil.eus/GetMesa?idMesa=${idMesa}/capacidad`;
-  const url = "../Salas_/salas.json"
+  const url = "./json/salas.json";
   fetch(url)
     .then(response => {
       if (!response.ok) {
@@ -58,13 +58,14 @@ botonAceptar.addEventListener('click', function() {
     alert('Por favor, ingresa un número válido de comensales.');
     return;
   }
-
+/*
   // Validar que no supere la capacidad
   const capacidadMax = parseInt(numeroSpan.textContent);
   if (cantidadIngresada > capacidadMax) {
     alert(`La cantidad ingresada supera la capacidad máxima de la mesa (${capacidadMax}).`);
     return;
   }
+     */
   localStorage.setItem('comensalesMesa', cantidadIngresada);
   window.location.href = '../Comandero/menu.html';
 });
