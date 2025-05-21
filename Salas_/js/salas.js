@@ -41,14 +41,3 @@ async function getMesas(idSala){
     return data;
 }
 
-
-// id mesa
-// estado 0 1 2 3
-
-//  array y json
-
-// 0 libre 
-// 1 reservado 
-// 2 comanda pedia
-// 3 finalizado
-
