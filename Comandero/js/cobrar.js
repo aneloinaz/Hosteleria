@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
 });
 
+import { AlertMessage } from "../../components/AlertComponents.js";
+import { AlertConfirm } from "../../components/AlertComponents.js";
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
@@ -54,19 +56,23 @@ function mostrarTotalEnCobrar() {
 
 
    function cancelarPago() {
-    if (confirm('¿Estás seguro de cancelar la operació?')) {
+    message = '¿Estás seguro de cancelar la operació?';
+    redirection = "./menu.html";
+    if (AlertConfirm(message,redirection)) {
         localStorage.removeItem('pedido'); 
         resumenTicket(); 
         window.location.href = 'Comandero/html/sala1.html';
     } else {
         alert('Operacion cancelada');
-      
     }
 }
 
 function PagoTarjeta() {
     alert('La operación se ha realizado con éxito');
-    window.location.href = 'factura.html';
+    window.location.href = 'salas1.html';
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    localStorage.removeItem(`pedido_mesa_${mesaId}`);
+    window.location.href = 'salas1.html';
 }
 
 function PagoEfectivo() {
@@ -85,8 +91,13 @@ function PagoEfectivo() {
 
     if (cambio === 0) {
         alert('Importe exacto.');
+        const mesaId = localStorage.getItem('mesaSeleccionada');
+        localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        window.location.href = 'salas1.html';
     } else if (cambio > 0) {
         alert(`Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`);
-        window.location.href = 'factura.html';
+        const mesaId = localStorage.getItem('mesaSeleccionada');
+        localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        window.location.href = 'salas1.html';
     }
   }

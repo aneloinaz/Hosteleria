@@ -1,5 +1,6 @@
 import { actualizarEstado } from "./mesasEstado.js";
-document.addEventListener('DOMContentLoaded', async () => {
+
+document.addEventListener('DOMContentLoaded', async () => {    
     localStorage.clear();
     let cont  = 0;
     async function actualizarMesas() {
