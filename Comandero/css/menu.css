@@ -270,6 +270,9 @@
   
   
   /* Cobrar */
+  .container{
+     margin: 50px 0px;
+  }
   .Resumenpedido {
     background-color: #2e3440;
     color: white;
@@ -279,6 +282,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 60vh;
   }
   
   .Resumenpedido h2 {

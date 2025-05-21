@@ -2,40 +2,34 @@ function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
-    const params = new URLSearchParams(window.location.search);
-    const idComanda = localStorage.getItem('idComanda') || '1'; // Toma el idComanda del localStorage
-    const url = `https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`;
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (!mesaId) {
+        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        return;
+    }
 
-    fetch(url)
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.text();
-        })
-        .then(text => {
-            const pedido = JSON.parse(text);
+    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    if (!pedidoGuardado) {
+        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        return;
+    }
 
-            if (!pedido.detalleComandas || pedido.detalleComandas.length === 0) {
-                lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-                return;
-            }
+    const pedido = JSON.parse(pedidoGuardado);
+    if (pedido.length === 0) {
+        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        return;
+    }
 
-            let pedidoLocal = [];
+    pedido.forEach(item => {
+        const li = document.createElement('li');
+        const subtotal = (item.precio * item.cantidad).toFixed(2);
+        li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
+        lista.appendChild(li);
+    });
 
-            pedido.detalleComandas.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
-                lista.appendChild(li);
-                pedidoLocal.push(item);
-            });
-
-            localStorage.setItem('pedido', JSON.stringify(pedidoLocal));
-            mostrarTotalEnCobrar();
-            
-        })
-        .catch(error => {
-            console.error('Error al obtener el pedido:', error);
-            lista.innerHTML = '<li>Error al cargar el pedido.</li>';
-        });
+    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
+    mostrarTotalEnCobrar();
+    generarQR();
 }
 
 function mostrarTotalEnCobrar() {
@@ -54,7 +48,6 @@ function mostrarTotalEnCobrar() {
     calcularCuota();
     calcularMediaxComensal();
 }
-
 function calcularBase() {
     const total = parseFloat(document.getElementById('total').textContent);
     const base = total / 1.10;
@@ -85,7 +78,7 @@ function imprimirSub() {
     ventanaImpresion.print();
     ventanaImpresion.close();
     alert('El ticket se ha impreso correctamente');
-    window.location.href = '/Comandero/html/factura.html';
+    window.location.href = '/Comandero/html/cobrar.html';
 }
 
 function mostrarFechaYHora() {
@@ -95,8 +88,8 @@ function mostrarFechaYHora() {
 }
 
 function mostrarInfoExtra() {
-    const salaMesa = localStorage.getItem('salaMesa') || '1 - A';
-    const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
+    const salaMesa = localStorage.getItem('salaMesa') || '';
+    const formaPago = localStorage.getItem('formaPago') || '';
     document.getElementById('sala-mesa').textContent = salaMesa;
     document.getElementById('forma-pago').textContent = formaPago;
 }
