@@ -6,8 +6,6 @@ import { AlertConfirm } from "../../components/AlertComponents.js";
 document.addEventListener('DOMContentLoaded', () => {
     mostrarPedidoEnCobrar();
     mostrarTotalEnCobrar();
-    
-    
 });
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
