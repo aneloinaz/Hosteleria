@@ -16,7 +16,7 @@ body {
   h1 {
     text-align: center;
   }
-  .resumen {
+  .FechaReserva {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 15px;
@@ -24,7 +24,7 @@ body {
     text-align: center;
   }
 
-  .resumen p {
+  .FechaReserva p {
     margin: 5px 0;
   }
 
