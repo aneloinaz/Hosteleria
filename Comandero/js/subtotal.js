@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarPedidoEnFactura();
     mostrarFechaYHora();
     mostrarInfoExtra();
+
+    document.getElementById("boton-imprimir").addEventListener("click", imprimirSub);
 });
 
 async function mostrarPedidoEnFactura() {
