@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Comanda enviada correctamente');
             // Limpia el pedido y vuelve a la sala
             localStorage.removeItem(`pedido_mesa_${mesaId}`);
-            window.location.href = 'salas1.html';
+            window.location.href = '../../Salas_/sala1.html';
         });
     }
 
