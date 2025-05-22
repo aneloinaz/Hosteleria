@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'index.html';
     }
 
-    //
-    78
     const categoriasJson = await fetchCategorias();
 
     if (categoriasJson.categorias.length > 0) {
@@ -281,7 +279,10 @@ function mostrarSubCategorias(subcategorias) {
 
 }
 
+let productosGlobal = []; // Esto se llena cuando llamas a fetchProductos
+
 function mostrarProductos(productos) {
+    productosGlobal = productos; // <-- Añade esto
     const container = document.getElementById('containerListadoDatos');
     container.innerHTML = '';
 
@@ -290,11 +291,11 @@ function mostrarProductos(productos) {
         return;
     }
     const containerHTML = productos.map(producto => {
-        // Si producto.numOrden no existe, pon 1 por defecto
+        const precioFloat = parseFloat(producto.precio);
         return `
-            <div class="productos" data-producto="${producto.id}">
+            <div class="productos" data-producto="${producto.id}" data-precio="${precioFloat}" data-numorden="${producto.numOrden || 1}">
                 <p>${producto.nombre}</p>
-                <span>${producto.precio}€</span>
+                <span>${precioFloat.toFixed(2)}€</span>
             </div>
         `;
     }).join('');
@@ -359,89 +360,103 @@ export async function pintarPedidoUlConEstado() {
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) return;
 
-    // 1. Obtener todas las comandas abiertas de la mesa
-    const comandasData = await obtenerComandasAbiertas(mesaId);
-    const comandas = Array.isArray(comandasData.comandas)
-        ? comandasData.comandas
-        : [];
-
-    // 2. Obtener detalles de cada comanda (productos ya enviados, con info completa)
-    let productosEnviados = [];
-    for (const comanda of comandas) {
-        const idComanda = comanda.idComanda;
-        if (!idComanda) continue;
-        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
-        const detalleData = await detalleRes.json();
-        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
-            productosEnviados = productosEnviados.concat(detalleData.detalleComandas);
-        }
-    }
-
-    // Agrupa productos enviados por idProducto (sumando cantidades si hay varios)
-    const enviadosAgrupados = {};
-    productosEnviados.forEach(prod => {
-        if (!enviadosAgrupados[prod.idProducto]) {
-            enviadosAgrupados[prod.idProducto] = {
-                nombre: prod.nombre,
-                cantidad: Number(prod.cantidad) || 0,
-                precio: parseFloat(prod.precio) || 0
-            };
-        } else {
-            enviadosAgrupados[prod.idProducto].cantidad += Number(prod.cantidad) || 0;
-        }
-    });
-
-    // Asegúrate de que productosEnviados es un array de números
-    const productosEnviadosIds = productosEnviados.map(prod => Number(prod.idProducto));
-
-    // 3. Mostrar la lista de productos del pedido actual (pendientes)
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
-
     const lista = document.querySelector('.pedido-ul');
     if (!lista) return;
     lista.innerHTML = '';
 
-    let total = 0;
+    // 1. Obtener comandas abiertas
+    const comandasData = await obtenerComandasAbiertas(mesaId);
+    const comandas = Array.isArray(comandasData.comandas) ? comandasData.comandas : [];
 
-    // Siempre muestra los productos enviados (en verde)
-    Object.entries(enviadosAgrupados).forEach(([id, prod]) => {
-        const cantidad = Number(prod.cantidad) || 0;
+    // 2. Obtener productos enviados
+    let productosEnviados = [];
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+
+        try {
+            const res = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+            const data = await res.json();
+            if (Array.isArray(data.detalleComandas)) {
+                productosEnviados = productosEnviados.concat(data.detalleComandas);
+            }
+        } catch (error) {
+            console.error(`Error obteniendo detalle de comanda ${idComanda}:`, error);
+        }
+    }
+
+    // 3. Agrupar productos enviados por idProducto y calcular totalEnviados
+    let totalEnviados = 0;
+    const enviadosAgrupados = {};
+    productosEnviados.forEach(prod => {
+        const id = Number(prod.idProducto);
+        if (!id) return;
+
+        // Busca el precio en productosGlobal si no viene en la API
+        let precioFloat = parseFloat(prod.precio);
+        if (!precioFloat || isNaN(precioFloat)) {
+            const productoLocal = productosGlobal.find(p => Number(p.id) === id);
+            precioFloat = productoLocal ? parseFloat(productoLocal.precio) : 0;
+        }
+
+        if (!enviadosAgrupados[id]) {
+            enviadosAgrupados[id] = {
+                nombre: prod.nombre || (productoLocal ? productoLocal.nombre : 'Producto'),
+                cantidad: Number(prod.cantidad) || 0,
+                precio: precioFloat
+            };
+        } else {
+            enviadosAgrupados[id].cantidad += Number(prod.cantidad) || 0;
+        }
+    });
+
+    // 4. Mostrar productos enviados (verde) y sumar su total
+    for (const [id, prod] of Object.entries(enviadosAgrupados)) {
+        const cantidad = prod.cantidad;
         const precio = parseFloat(prod.precio) || 0;
         const li = document.createElement('li');
         li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
         li.classList.add('producto-enviado');
         lista.appendChild(li);
-        total += cantidad * precio;
+        totalEnviados += cantidad * precio;
+    }
+
+    // Guarda el total de enviados en una variable global
+    window.totalEnviadosComanda = totalEnviados;
+
+    // 5. Mostrar productos pendientes del pedido actual (naranja) y sumar su total
+    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+
+    const idsEnviados = Object.keys(enviadosAgrupados).map(id => Number(id));
+
+    let totalPendientes = 0;
+    pedido.forEach(prod => {
+        const id = Number(prod.id);
+        const cantidad = Number(prod.cantidad);
+        const precio = parseFloat(prod.precio) || 0;
+
+        if (idsEnviados.includes(id)) return;
+        if (!id || isNaN(cantidad) || isNaN(precio) || cantidad <= 0) return;
+
+        const li = document.createElement('li');
+        li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
+        li.classList.add('producto-noenviado');
+        lista.appendChild(li);
+        totalPendientes += cantidad * precio;
     });
 
-    // Luego muestra los productos pendientes (en naranja)
-    pedido.forEach(producto => {
-    if (productosEnviadosIds.includes(Number(producto.id))) return;
-
-    // Validaciones defensivas
-    const nombre = producto.nombre || 'Producto sin nombre';
-    const cantidad = Number(producto.cantidad);
-    let precio = parseFloat(producto.precio);
-
-    // Si falta nombre, precio o cantidad válida, saltar este producto
-    if (!nombre || isNaN(precio) || isNaN(cantidad)) return;
-
-    const li = document.createElement('li');
-    li.textContent = `${nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
-    li.classList.add('producto-noenviado');
-    lista.appendChild(li);
-
-    // Solo suma si ambos son válidos
-    if (!isNaN(precio) && !isNaN(cantidad)) {
-        total += cantidad * precio;
-    }
-});
-
-
-    // Mostrar el total en el DOM
+    // 6. Mostrar total de toda la comanda (enviados + pendientes)
+    const totalComanda = totalEnviados + totalPendientes;
     const totalSpan = document.querySelector('.total span');
     if (totalSpan) {
-        totalSpan.textContent = `${total.toFixed(2)}€`;
+        totalSpan.textContent = `${totalComanda.toFixed(2)}€`;
     }
+}
+
+if (!window.domReadyListenerAdded) {
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM completamente cargado");
+  });
+  window.domReadyListenerAdded = true;
 }
