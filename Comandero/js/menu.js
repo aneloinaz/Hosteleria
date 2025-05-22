@@ -1,6 +1,9 @@
 import { handlerProductos } from "./pedido.js";
+import { AlertMessage } from "../../components/AlertComponents.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
+    let message = '';
+    let redirection = '';
     // meter manualmente la mesa
     const mesa = 1;
     const comensales = 4;
@@ -16,8 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     if (!datosMesa) {
-        alert('No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.');
-        window.location.href = 'index.html';
+        message = 'No se han encontrado datos de la mesa. Por favor, vuelve a la página anterior.';
+        redirection = "../../Salas_/sala1.html";
+        AlertMessage(message,redirection);
     }
 
     const categoriasJson = await fetchCategorias();
@@ -50,16 +54,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('[ENVIAR] mesaId:', mesaId);
 
             if (!mesaId) {
-                alert('No se ha seleccionado ninguna mesa.');
-                return;
+               message = 'No se ha seleccionado ninguna mesa.';
+               redirection = "../../Salas_/sala1.html";
+               AlertMessage(message,redirection);
+                    return;
             }
 
             const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
             console.log('[ENVIAR] pedidoGuardado:', pedidoGuardado);
 
             if (!pedidoGuardado) {
-                alert('No hay productos en el pedido.');
-                return;
+            message = 'No hay productos en el pedido.';
+            AlertMessage(message);
+            return;
             }
             const pedido = JSON.parse(pedidoGuardado);
             console.log('[ENVIAR] pedido:', pedido);
@@ -112,8 +119,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('[ENVIAR] idComanda final:', idComanda);
 
             if (!idComanda) {
-                alert('No se pudo obtener el id de la comanda.');
-                return;
+               message = 'No se pudo obtener el id de la comanda.';
+               AlertMessage(message);
+               return;
             }
             localStorage.setItem('idComanda', idComanda);
 
@@ -155,8 +163,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('[ENVIAR] detalles a enviar:', detalles);
 
             if (detalles.length === 0) {
-                alert('No hay productos nuevos para enviar.');
-                return;
+               message = 'No hay productos nuevos para enviar.';
+               AlertMessage(message);
+               return;
             }
 
             const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
@@ -179,14 +188,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('[ENVIAR] Respuesta detalle:', dataDetalle);
 
             if (!resDetalle.ok || dataDetalle.ok === false) {
-                alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+                message = 'Error al insertar detalle de comanda: ' + (dataDetalle.status || '');
+                AlertMessage(message);
                 return;
             }
-
-            alert('Comanda enviada correctamente');
+                message = 'Comanda enviada correctamente';
+                redirection = '../../Salas_/sala1.html';
+                AlertMessage(message, redirection);
             // Limpia el pedido y vuelve a la sala
             localStorage.removeItem(`pedido_mesa_${mesaId}`);
-            window.location.href = 'salas1.html';
+            
         });
     }
 
@@ -350,7 +361,8 @@ async function insertarDetalleComanda(idComanda, producto) {
     console.log('Respuesta detalle:', dataDetalle);
 
     if (!resDetalle.ok || dataDetalle.ok === false) {
-        alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+       let message = 'Error al insertar detalle de comanda: ' + (dataDetalle.status || '');
+        AlertMessage(message);
         return false;
     }
     return true;
