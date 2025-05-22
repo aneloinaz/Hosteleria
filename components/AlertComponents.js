@@ -74,6 +74,7 @@ export function AlertPrompt(message){
         p.textContent = message;
         //input pidiendo datos
         const input = document.createElement('input');
+        input.setAttribute('type','number');
         
 
 
