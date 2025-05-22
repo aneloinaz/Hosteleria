@@ -7,6 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const personas = document.getElementById('personas').value;
       const fecha = document.getElementById('fecha').value;
       const hora = '12:00'; // fija, como indica el HTML
+      const mesa = localStorage.getItem("mesaSeleccionada");
+    if (!mesa) {
+      alert("Por favor seleccione una mesa antes de continuar.");
+      e.preventDefault();
+    } else {
+      const hiddenMesa = document.createElement("input");
+      hiddenMesa.type = "hidden";
+      hiddenMesa.name = "mesa";
+      hiddenMesa.value = mesa;
+      this.appendChild(hiddenMesa);
+    }
   
       // Crear objeto para enviar
       const datos = {
@@ -26,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(response => response.json())
       .then(data => {
         if (data.disponible) {
+           cargarSala("sala1.html");
           // Redirigir si hay mesas libres
           window.location.href = 'iconfirmacion.html';
         } else {
@@ -38,4 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   });
+  function cargarSala(sala) {
+    fetch(sala)
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById("contenedorSala").innerHTML = html;
+      });
+  }
   

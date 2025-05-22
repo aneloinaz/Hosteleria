@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="/Reservas/css/index.css">
+    <link rel="stylesheet" href="/Reservas/css/salas.css">
+    <script src="/Reservas/javascript/indexsalas.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>RESERVE EN LHUSURBIL</h1>
+        <p class="direccion">De Etarte Bidea, 20160 Zubieta, Gipuzkoa</p>
+
+        <form id="FechaReserva" method="POST">
+            <div class="FechaReserva">
+
+                <label for="numComensales">👤 N° DE PERSONAS:</label><br>
+                <input type="number" id="personas" name="numComensales" min="1" max="8" required><br><br>
+                <label for="fecha">Fecha:</label><br>
+                <input type="date" id="fecha" name="fecha" required><br><br>
+                <label for="hora">Hora: 12:00</label><br><br>
+                <!--<input type="time" id="hora" name="hora" required><br><br>-->
+                <h2>Seleccione su mesa en la sala:</h2>
+                <div id="contenedor-sala1">
+                    <h3>Sala 1</h3>
+                    <div id="plano-sala1" class="restaurante"></div>
+                </div>
+
+                <div id="contenedor-sala2">
+                    <h3>Sala 2</h3>
+                    <div id="plano-sala2" class="restaurante"></div>
+                </div>
+                <button type="submit" class="continuar">CONTINUAR</button>
+            </div>
+        </form>
+        <p class="contacto">Llámenos al <strong style="color:#003366;">943364600</strong> si son más de 8 personas o si
+            tiene cualquier duda.</p>
+    </div>
+
+
+
+</body>
+
+</html>

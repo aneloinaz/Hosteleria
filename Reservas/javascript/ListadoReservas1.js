@@ -23,7 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
         datos.reservas.forEach(reserva => {
           const fila = document.createElement("tr");
           fila.innerHTML = `
-            <td>${reserva.numMesa}</td>
+           <td>${reserva.idReserva}</td> 
+          <td>${reserva.numMesa}</td>
             <td>${reserva.nombreCliente}</td>
             <td>${reserva.apellidoCliente}</td>
             <td>${reserva.telefonoCliente}</td>
@@ -64,24 +65,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-function eliminarReserva(idReserva){
-     if (!confirm(`¿Seguro que deseas eliminar la reserva de la mesa ${idReserva}?`)) return;
+function eliminarReserva(idreserva){
+    console.log(idreserva);
+     if (!confirm(`¿Seguro que deseas eliminar la reserva?`)) return;
 
-    fetch(`/api/reservas/eliminar`, {
-      method: "POST", // Cambia a DELETE si tu API lo requiere
+    fetch(`https://apiostalaritza.lhusurbil.eus/DeleteReserva?idreserva=${encodeURIComponent(idreserva)}`, {
+      method: "DELETE", 
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ idReserva })
+      body: JSON.stringify({ idreserva })
     })
-      .then(response => {
-        if (!response.ok) throw new Error("Error al eliminar la reserva");
+        
+      
+    .then(response => response.json())
+    .then(data => {
+      
+        if (!data.ok) throw new Error("Error al eliminar la reserva");
         // Recargar reservas para la fecha actual
-        cargarReservas(fechaInput.value);
+        else
+            cargarReservas(fechaInput);
       })
       .catch(error => {
         console.error("Error al eliminar:", error);
-        alert("No se pudo eliminar la reserva");
+        alert("No se pudo eliminar la reserva ssSS");
       });
   }
 
