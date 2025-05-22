@@ -1,6 +1,6 @@
 .alertComponent{
     background-color: rgb(152, 85, 146);
-    min-width: 40rem;
+    min-width: 50rem;
     min-height: 10rem;
     position: absolute;
     top:50%;

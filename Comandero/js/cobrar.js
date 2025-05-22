@@ -1,62 +1,88 @@
 import { AlertMessage } from "../../components/AlertComponents.js";
 import { AlertConfirm } from "../../components/AlertComponents.js";
-// funcion que trae los datos del pedido generados en la pagina anterior
-//funcion que tien que hacer yahir
-// function resumenTicket() {
 
-// }
+// Variable global para guardar el pedido actual
+let pedidoActual = [];
 
-function mostrarPedidoEnCobrar() {
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("boton-tarjeta").addEventListener('click', PagoTarjeta);
+    document.getElementById("boton-efectivo").addEventListener('click', () => PagoEfectivo(pedidoActual));
+    document.getElementById("boton-cancelar").addEventListener('click', async () => { cancelarPago() });
+
+    mostrarPedidoEnCobrar();
+});
+
+async function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
-    fetch("https://apiostalaritza.lhusurbil.eus/api/GetDetallePedido") // ← URL real de la API, sin "swagger/index.html"
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (!mesaId) {
+        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        return;
+    }
+
+    // Obtener productos de la comanda
+    let pedidoGuardado = [];
+
+    // 1. Recuperar productos de la API (comandas abiertas)
+    const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+    const dataComandas = await resComandas.json();
+    const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+        const detalleData = await detalleRes.json();
+        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+            pedidoGuardado = pedidoGuardado.concat(detalleData.detalleComandas);
+        }
+    }
+
+    // 2. Recuperar productos del localStorage (productos no enviados)
+    const pedidoLocal = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    if (pedidoLocal) {
+        try {
+            const productosLocales = JSON.parse(pedidoLocal);
+            if (Array.isArray(productosLocales)) {
+                // Fusionamos los productos de la API con los productos del localStorage
+                pedidoGuardado = pedidoGuardado.concat(productosLocales);
             }
-            return response.json();
-        })
-        .then(pedido => {
-            if (!pedido || pedido.length === 0) {
-                lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-                return;
-            }
-            pedido.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
-                lista.appendChild(li);
-            });
-        })
-        .catch(error => {
-            console.error('Error al obtener el pedido:', error);
-            lista.innerHTML = '<li>Error al cargar el pedido.</li>';
-        });
+        } catch (e) {
+            console.error("Error al parsear productos locales:", e);
+        }
+    }
+
+    if (!pedidoGuardado || pedidoGuardado.length === 0) {
+        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        return;
+    }
+
+    // Guardar el pedido actual en la variable global
+    pedidoActual = pedidoGuardado;
+
+    pedidoGuardado.forEach(item => {
+        const li = document.createElement('li');
+        const subtotal = (item.precio * item.cantidad).toFixed(2);
+        li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
+        lista.appendChild(li);
+    });
+
+    mostrarTotalEnCobrar(pedidoGuardado);
 }
 
-
-function mostrarTotalEnCobrar() {
-    const pedidoGuardado = localStorage.getItem("pedido");
-    const totalSpan = document.getElementById("total");
+function mostrarTotalEnCobrar(pedido) {
+    const totalSpan = document.getElementById('totalCobro');
     let total = 0;
 
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
+    if (pedido && Array.isArray(pedido)) {
         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
     }
 
     totalSpan.textContent = total.toFixed(2);
-
-    calcularBase();
-    calcularCuota();
-    calcularMediaxComensal();
-    mostrarQR();
 }
-// 
-document.getElementById("boton-tarjeta").addEventListener('click', PagoTarjeta);
-document.getElementById("boton-efectivo").addEventListener('click', PagoEfectivo);
-document.getElementById("boton-cancelar").addEventListener('click', async () => { cancelarPago() });
-//
+
 async function cancelarPago() {
     let message = "¿Estás seguro de cancelar la operación?";
     if (await AlertConfirm(message)) {
@@ -65,8 +91,7 @@ async function cancelarPago() {
         resumenTicket();
         window.location.href = './menu.html';
     } else {
-        message = "Operacion cancelada";
-        AlertMessage(message);
+        AlertMessage("Operación cancelada");
     }
 }
 
@@ -76,18 +101,128 @@ function PagoTarjeta() {
     AlertMessage(message, redirection);
 }
 
-function PagoEfectivo() {
-    let total = totalTicket(); // Obtener el total desde la función totalTicket()
+function PagoEfectivo(pedido) {
+    if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
+        AlertMessage("No hay productos cargados para cobrar.");
+        return;
+    }
+
+    let total = pedido.reduce((sum, item) => {
+        const precio = Number(item.precio) || 0;
+        const cantidad = Number(item.cantidad) || 0;
+        return sum + precio * cantidad;
+    }, 0);
+
     let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
-    let cambio = recibido - total;
+    if (isNaN(recibido)) {
+        AlertMessage("Por favor, ingrese una cantidad válida.");
+        return;
+    }
+
+    // Redondeo para evitar problemas de decimales
+    let cambio = Math.round((recibido - total) * 100) / 100;
+
+    let message = "";
     let redirection = "";
+
     if (cambio === 0) {
-        message = "Importe Exacto";
-        redirection = "../../Salas_/sala1.html";
+        message = 'Pago realizado con éxito. Importe Exacto';
+        redirection = 'factura.html';
         AlertMessage(message, redirection);
     } else if (cambio > 0) {
         message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
-        redirection = "";
+        redirection = 'factura.html';
         AlertMessage(message, redirection);
+    } else {
+        message = 'El importe recibido es insuficiente.';
+        AlertMessage(message);
     }
 }
+
+// Función pendiente por implementar
+function resumenTicket() {
+    // Implementar lógica si es necesario
+}
+
+
+// 
+
+
+
+
+
+
+
+
+
+// function mostrarTotalEnCobrar() {
+//     const pedidoGuardado = localStorage.getItem('pedido');
+//     const totalSpan = document.getElementById('total');
+//     let total = 0;
+
+//     if (pedidoGuardado) {
+//         const pedido = JSON.parse(pedidoGuardado);
+//         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+//     }
+
+//     totalSpan.textContent = total.toFixed(2);
+// }
+
+
+//    async function cancelarPago() {
+//     let message = '¿Aceptas anular la operación?';
+//     if ( await AlertConfirm(message)) {
+//         localStorage.removeItem('pedido'); 
+//         window.location.href = './menu.html';
+//     } else {
+//         message = 'Operacion cancelada';
+//         AlertMessage(message);
+//     }
+// }
+
+// function PagoTarjeta() {
+//     let message = 'La operación se ha realizado con éxito';
+//     let redirection = '../../Salas_/sala1.html';
+//     AlertMessage(message,redirection);
+//     //al llegar a salas el localStorage se borra automaticamente
+//     // const mesaId = localStorage.getItem('mesaSeleccionada');
+//     // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+//     // window.location.href = 'salas1.html';
+// }
+
+// function PagoEfectivo() {
+//     const pedidoGuardado = localStorage.getItem("pedido");
+//     let total = 0;
+//     if (pedidoGuardado) {
+//         const pedido = JSON.parse(pedidoGuardado);
+//         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+//     }
+//     let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
+//     if (isNaN(recibido)) {
+//         alert('Por favor, ingrese una cantidad válida.');
+//         return;
+//     }
+//     let cambio = recibido - total;
+
+//     if (cambio === 0) {
+//         let message = 'Importe Exacto';
+//         let redirection = '../../Salas_/sala1.html';
+//         //al llegar a salas se borra todo automaticamente
+//         // const mesaId = localStorage.getItem('mesaSeleccionada');
+//         // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+
+//         AlertMessage(message,redirection);
+        
+//         window.location.href = 'salas1.html';
+//     } else if (cambio > 0) {
+//         let message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
+//         let redirection = '../../Salas_/sala1.html';
+        
+//         //al llegar a salas se borra todo automaticamente
+//         // const mesaId = localStorage.getItem('mesaSeleccionada');
+//         // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+//         // window.location.href = 'salas1.html';
+
+//         AlertMessage(message,redirection);
+//     }
+// }
