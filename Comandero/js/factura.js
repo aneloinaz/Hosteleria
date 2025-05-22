@@ -1,3 +1,4 @@
+
 function imprimirTicket() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
