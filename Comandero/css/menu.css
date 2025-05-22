@@ -259,20 +259,14 @@
   
   #boton-esperar {
     color: #2e3440;
-    background-color: rgb(179, 239, 234);
+    background-color: rgb(216, 216, 216);
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     padding: 10px;
     width: 100%;
-    text-align: center;
-    font-size: 1.2em;
   }
-    #boton-esperar:hover {
-      transform: scale(1.08);
-      background-color: #51ad6a;
-    }
   
   
   /* Cobrar */

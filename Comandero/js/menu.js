@@ -20,15 +20,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'index.html';
     }
 
-    //
-
     const categoriasJson = await fetchCategorias();
 
     if (categoriasJson.categorias.length > 0) {
         const primeraId = categoriasJson.categorias[0].id;
 
         const subcategoriasJson = await fetchSubCategorias(primeraId);
-
+        
         //mostrar lista de categorias al cargar
         mostrarCategorias(categoriasJson.categorias);
         mostrarSubCategorias(subcategoriasJson.categorias);
@@ -48,171 +46,147 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnEnviar = document.getElementById('boton-esperar');
     if (btnEnviar) {
         btnEnviar.addEventListener('click', async () => {
-            btnEnviar.textContent = 'Cargando...';
-            btnEnviar.disabled = true;
-            try {
-                const mesaId = localStorage.getItem('mesaSeleccionada');
-                console.log('[ENVIAR] mesaId:', mesaId);
+            const mesaId = localStorage.getItem('mesaSeleccionada');
+            console.log('[ENVIAR] mesaId:', mesaId);
 
-                if (!mesaId) {
-                    alert('No se ha seleccionado ninguna mesa.');
-                    return;
-                }
+            if (!mesaId) {
+                alert('No se ha seleccionado ninguna mesa.');
+                return;
+            }
 
-                const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-                console.log('[ENVIAR] pedidoGuardado:', pedidoGuardado);
+            const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+            console.log('[ENVIAR] pedidoGuardado:', pedidoGuardado);
 
-                if (!pedidoGuardado) {
-                    alert('No hay productos en el pedido.');
-                    return;
-                }
-                const pedido = JSON.parse(pedidoGuardado);
-                console.log('[ENVIAR] pedido:', pedido);
+            if (!pedidoGuardado) {
+                alert('No hay productos en el pedido.');
+                return;
+            }
+            const pedido = JSON.parse(pedidoGuardado);
+            console.log('[ENVIAR] pedido:', pedido);
 
-                // 1. Obtener comandas abiertas
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
-                console.log('[ENVIAR] comandasAbiertas:', comandasAbiertas);
+            // 1. Obtener comandas abiertas
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
+            console.log('[ENVIAR] comandasAbiertas:', comandasAbiertas);
 
-                let lista = Array.isArray(comandasAbiertas.comandas)
-                    ? comandasAbiertas.comandas
-                    : [];
+            let lista = Array.isArray(comandasAbiertas.comandas)
+                ? comandasAbiertas.comandas
+                : [];
 
-                let idComanda = null;
+            let idComanda = null;
 
-                if (lista.length > 0) {
-                    // Ya hay comanda abierta, usa la última
-                    const comandaReciente = lista[lista.length - 1];
-                    console.log('[ENVIAR] comandaReciente:', comandaReciente);
-                    idComanda =
-                        comandaReciente.idComanda ||
-                        comandaReciente.Idcomanda ||
-                        comandaReciente.id ||
-                        comandaReciente.comandaId ||
-                        null;
-                    if (!idComanda) {
-                        for (const key in comandaReciente) {
-                            if (
-                                typeof comandaReciente[key] === 'number' &&
-                                comandaReciente[key] > 0
-                            ) {
-                                idComanda = comandaReciente[key];
-                                break;
-                            }
+            if (lista.length > 0) {
+                // Ya hay comanda abierta, usa la última
+                const comandaReciente = lista[lista.length - 1];
+                console.log('[ENVIAR] comandaReciente:', comandaReciente);
+                idComanda =
+                    comandaReciente.idComanda ||
+                    comandaReciente.Idcomanda ||
+                    comandaReciente.id ||
+                    comandaReciente.comandaId ||
+                    null;
+                if (!idComanda) {
+                    for (const key in comandaReciente) {
+                        if (
+                            typeof comandaReciente[key] === 'number' &&
+                            comandaReciente[key] > 0
+                        ) {
+                            idComanda = comandaReciente[key];
+                            break;
                         }
                     }
-                } else {
-                    // No hay comanda abierta, crea una nueva
-                    console.log('[ENVIAR] No hay comanda abierta, creando nueva...');
-                    const nuevaComanda = await crearComanda(mesaId);
-                    console.log('[ENVIAR] nuevaComanda:', nuevaComanda);
-
-                    // Espera un momento y vuelve a consultar las comandas abiertas
-                    await new Promise(resolve => setTimeout(resolve, 500)); 
-                    const comandasActualizadas = await obtenerComandasAbiertas(mesaId);
-                    let listaActualizada = Array.isArray(comandasActualizadas.comandas)
-                        ? comandasActualizadas.comandas
-                        : [];
-                    if (listaActualizada.length > 0) {
-                        const comandaReciente = listaActualizada[listaActualizada.length - 1];
-                        idComanda =
-                            comandaReciente.idComanda ||
-                            comandaReciente.Idcomanda ||
-                            comandaReciente.id ||
-                            comandaReciente.comandaId ||
-                            null;
-                    } else {
-                        idComanda =
-                            nuevaComanda.idComanda ||
-                            nuevaComanda.Idcomanda ||
-                            nuevaComanda.id ||
-                            nuevaComanda.comandaId ||
-                            null;
-                    }
                 }
-
-                console.log('[ENVIAR] idComanda final:', idComanda);
-
-                if (!idComanda) {
-                    alert('No se pudo obtener el id de la comanda.');
-                    return;
-                }
-                localStorage.setItem('idComanda', idComanda);
-
-                // --- Obtener productos ya enviados ---
-                let productosEnviados = [];
-                for (const comanda of lista) {
-                    const idCom = comanda.idComanda;
-                    if (!idCom) continue;
-                    const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idCom}`);
-                    const detalleData = await detalleRes.json();
-                    console.log(`[ENVIAR] Detalle de comanda ${idCom}:`, detalleData);
-                    if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
-                        productosEnviados = productosEnviados.concat(
-                            detalleData.detalleComandas.map(d => d.idProducto)
-                        );
-                    }
-                }
-                console.log('[ENVIAR] productosEnviados:', productosEnviados);
-
-                // --- Filtrar solo los productos válidos ---
-                const detalles = pedido
-                    .filter(producto => {
-                        const id = Number(producto.id);
-                        const cantidad = Number(producto.cantidad);
-                        // Solo agrega si id y cantidad son válidos y positivos
-                        return (
-                            !isNaN(id) &&
-                            !isNaN(cantidad) &&
-                            id > 0 &&
-                            cantidad > 0
-                        );
-                    })
-                    .map(producto => ({
-                        idComanda: Number(idComanda),
-                        idProducto: Number(producto.id),
-                        cantidad: Number(producto.cantidad)
-                    }));
-
-                console.log('[ENVIAR] detalles a enviar:', detalles);
-
-                if (detalles.length === 0) {
-                    alert('No hay productos nuevos para enviar.');
-                    return;
-                }
-
-                const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
-                const resDetalle = await fetch(urlDetalle, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(detalles)
-                });
-
-                let dataDetalle = null;
-                const textDetalle = await resDetalle.text();
-                try {
-                    dataDetalle = textDetalle ? JSON.parse(textDetalle) : {};
-                } catch (e) {
-                    console.error('Respuesta no es JSON válido:', textDetalle);
-                    dataDetalle = {};
-                }
-                console.log('[ENVIAR] Respuesta detalle:', dataDetalle);
-
-                if (!resDetalle.ok || dataDetalle.ok === false) {
-                    alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
-                    return;
-                }
-
-                alert('Comanda enviada correctamente');
-                // Limpia el pedido y vuelve a la sala
-                localStorage.removeItem(`pedido_mesa_${mesaId}`);
-                window.location.href = '../../Salas_/sala1.html';
-            } finally {
-                btnEnviar.textContent = 'Enviar';
-                btnEnviar.disabled = false;
+            } else {
+                // No hay comanda abierta, crea una nueva
+                console.log('[ENVIAR] No hay comanda abierta, creando nueva...');
+                const nuevaComanda = await crearComanda(mesaId);
+                console.log('[ENVIAR] nuevaComanda:', nuevaComanda);
+                idComanda =
+                    nuevaComanda.idComanda ||
+                    nuevaComanda.Idcomanda ||
+                    nuevaComanda.id ||
+                    nuevaComanda.comandaId ||
+                    null;
             }
+
+            console.log('[ENVIAR] idComanda final:', idComanda);
+
+            if (!idComanda) {
+                alert('No se pudo obtener el id de la comanda.');
+                return;
+            }
+            localStorage.setItem('idComanda', idComanda);
+
+            // --- Obtener productos ya enviados ---
+            let productosEnviados = [];
+            for (const comanda of lista) {
+                const idCom = comanda.idComanda;
+                if (!idCom) continue;
+                const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idCom}`);
+                const detalleData = await detalleRes.json();
+                console.log(`[ENVIAR] Detalle de comanda ${idCom}:`, detalleData);
+                if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+                    productosEnviados = productosEnviados.concat(
+                        detalleData.detalleComandas.map(d => d.idProducto)
+                    );
+                }
+            }
+            console.log('[ENVIAR] productosEnviados:', productosEnviados);
+
+            // --- Filtrar solo los productos válidos ---
+            const detalles = pedido
+                .filter(producto => {
+                    const id = Number(producto.id);
+                    const cantidad = Number(producto.cantidad);
+                    // Solo agrega si id y cantidad son válidos y positivos
+                    return (
+                        !isNaN(id) &&
+                        !isNaN(cantidad) &&
+                        id > 0 &&
+                        cantidad > 0
+                    );
+                })
+                .map(producto => ({
+                    idComanda: Number(idComanda),
+                    idProducto: Number(producto.id),
+                    cantidad: Number(producto.cantidad)
+                }));
+
+            console.log('[ENVIAR] detalles a enviar:', detalles);
+
+            if (detalles.length === 0) {
+                alert('No hay productos nuevos para enviar.');
+                return;
+            }
+
+            const urlDetalle = `https://apiostalaritza.lhusurbil.eus/PostInsertDetalleComanda`;
+            const resDetalle = await fetch(urlDetalle, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(detalles)
+            });
+
+            let dataDetalle = null;
+            const textDetalle = await resDetalle.text();
+            try {
+                dataDetalle = textDetalle ? JSON.parse(textDetalle) : {};
+            } catch (e) {
+                console.error('Respuesta no es JSON válido:', textDetalle);
+                dataDetalle = {};
+            }
+            console.log('[ENVIAR] Respuesta detalle:', dataDetalle);
+
+            if (!resDetalle.ok || dataDetalle.ok === false) {
+                alert('Error al insertar detalle de comanda: ' + (dataDetalle.status || ''));
+                return;
+            }
+
+            alert('Comanda enviada correctamente');
+            // Limpia el pedido y vuelve a la sala
+            localStorage.removeItem(`pedido_mesa_${mesaId}`);
+            window.location.href = 'salas1.html';
         });
     }
 
@@ -305,7 +279,10 @@ function mostrarSubCategorias(subcategorias) {
 
 }
 
+let productosGlobal = []; // Esto se llena cuando llamas a fetchProductos
+
 function mostrarProductos(productos) {
+    productosGlobal = productos; // <-- Añade esto
     const container = document.getElementById('containerListadoDatos');
     container.innerHTML = '';
 
@@ -314,11 +291,11 @@ function mostrarProductos(productos) {
         return;
     }
     const containerHTML = productos.map(producto => {
-        // Si producto.numOrden no existe, pon 1 por defecto
+        const precioFloat = parseFloat(producto.precio);
         return `
-            <div class="productos" data-producto="${producto.id}">
+            <div class="productos" data-producto="${producto.id}" data-precio="${precioFloat}" data-numorden="${producto.numOrden || 1}">
                 <p>${producto.nombre}</p>
-                <span>${producto.precio}€</span>
+                <span>${precioFloat.toFixed(2)}€</span>
             </div>
         `;
     }).join('');
@@ -383,77 +360,103 @@ export async function pintarPedidoUlConEstado() {
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) return;
 
-    // 1. Obtener todas las comandas abiertas de la mesa
-    const comandasData = await obtenerComandasAbiertas(mesaId);
-    const comandas = Array.isArray(comandasData.comandas)
-        ? comandasData.comandas
-        : [];
-
-    // 2. Obtener detalles de cada comanda (productos ya enviados, con info completa)
-    let productosEnviados = [];
-    for (const comanda of comandas) {
-        const idComanda = comanda.idComanda;
-        if (!idComanda) continue;
-        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
-        const detalleData = await detalleRes.json();
-        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
-            productosEnviados = productosEnviados.concat(detalleData.detalleComandas);
-        }
-    }
-
-    // Agrupa productos enviados por idProducto (sumando cantidades si hay varios)
-    const enviadosAgrupados = {};
-    productosEnviados.forEach(prod => {
-        if (!enviadosAgrupados[prod.idProducto]) {
-            enviadosAgrupados[prod.idProducto] = {
-                nombre: prod.nombre,
-                cantidad: Number(prod.cantidad) || 0,
-                precio: Number(prod.precio) || 0
-            };
-        } else {
-            enviadosAgrupados[prod.idProducto].cantidad += Number(prod.cantidad) || 0;
-        }
-    });
-
-    // Asegúrate de que productosEnviados es un array de números
-    const productosEnviadosIds = productosEnviados.map(prod => Number(prod.idProducto));
-
-    // 3. Mostrar la lista de productos del pedido actual (pendientes)
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
-
     const lista = document.querySelector('.pedido-ul');
     if (!lista) return;
     lista.innerHTML = '';
 
-    let total = 0;
+    // 1. Obtener comandas abiertas
+    const comandasData = await obtenerComandasAbiertas(mesaId);
+    const comandas = Array.isArray(comandasData.comandas) ? comandasData.comandas : [];
 
-    // Siempre muestra los productos enviados (en verde)
-    Object.entries(enviadosAgrupados).forEach(([id, prod]) => {
-        const cantidad = Number(prod.cantidad) || 0;
-        const precio = Number(prod.precio) || 0;
+    // 2. Obtener productos enviados
+    let productosEnviados = [];
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+
+        try {
+            const res = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+            const data = await res.json();
+            if (Array.isArray(data.detalleComandas)) {
+                productosEnviados = productosEnviados.concat(data.detalleComandas);
+            }
+        } catch (error) {
+            console.error(`Error obteniendo detalle de comanda ${idComanda}:`, error);
+        }
+    }
+
+    // 3. Agrupar productos enviados por idProducto y calcular totalEnviados
+    let totalEnviados = 0;
+    const enviadosAgrupados = {};
+    productosEnviados.forEach(prod => {
+        const id = Number(prod.idProducto);
+        if (!id) return;
+
+        // Busca el precio en productosGlobal si no viene en la API
+        let precioFloat = parseFloat(prod.precio);
+        if (!precioFloat || isNaN(precioFloat)) {
+            const productoLocal = productosGlobal.find(p => Number(p.id) === id);
+            precioFloat = productoLocal ? parseFloat(productoLocal.precio) : 0;
+        }
+
+        if (!enviadosAgrupados[id]) {
+            enviadosAgrupados[id] = {
+                nombre: prod.nombre || (productoLocal ? productoLocal.nombre : 'Producto'),
+                cantidad: Number(prod.cantidad) || 0,
+                precio: precioFloat
+            };
+        } else {
+            enviadosAgrupados[id].cantidad += Number(prod.cantidad) || 0;
+        }
+    });
+
+    // 4. Mostrar productos enviados (verde) y sumar su total
+    for (const [id, prod] of Object.entries(enviadosAgrupados)) {
+        const cantidad = prod.cantidad;
+        const precio = parseFloat(prod.precio) || 0;
         const li = document.createElement('li');
         li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
         li.classList.add('producto-enviado');
         lista.appendChild(li);
-        total += cantidad * precio;
-    });
+        totalEnviados += cantidad * precio;
+    }
 
-    // Luego muestra los productos pendientes (en naranja)
-    pedido.forEach(producto => {
-        if (productosEnviadosIds.includes(Number(producto.id))) return;
-        const cantidad = Number(producto.cantidad) || 0;
-        const precio = Number(producto.precio) || 0;
+    // Guarda el total de enviados en una variable global
+    window.totalEnviadosComanda = totalEnviados;
+
+    // 5. Mostrar productos pendientes del pedido actual (naranja) y sumar su total
+    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+
+    const idsEnviados = Object.keys(enviadosAgrupados).map(id => Number(id));
+
+    let totalPendientes = 0;
+    pedido.forEach(prod => {
+        const id = Number(prod.id);
+        const cantidad = Number(prod.cantidad);
+        const precio = parseFloat(prod.precio) || 0;
+
+        if (idsEnviados.includes(id)) return;
+        if (!id || isNaN(cantidad) || isNaN(precio) || cantidad <= 0) return;
+
         const li = document.createElement('li');
-        li.textContent = `${producto.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
+        li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
         li.classList.add('producto-noenviado');
         lista.appendChild(li);
-        total += cantidad * precio;
+        totalPendientes += cantidad * precio;
     });
 
-    // Mostrar el total en el DOM
+    // 6. Mostrar total de toda la comanda (enviados + pendientes)
+    const totalComanda = totalEnviados + totalPendientes;
     const totalSpan = document.querySelector('.total span');
     if (totalSpan) {
-        totalSpan.textContent = `${total.toFixed(2)}€`;
+        totalSpan.textContent = `${totalComanda.toFixed(2)}€`;
     }
+}
+
+if (!window.domReadyListenerAdded) {
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM completamente cargado");
+  });
+  window.domReadyListenerAdded = true;
 }
