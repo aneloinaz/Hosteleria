@@ -10,7 +10,7 @@
     background-color: #fff;
   }
   
-  .container_Menu {
+  .container {
     width: 100%;
   }
   
@@ -19,7 +19,6 @@
     display: flex;
     justify-content: space-between;
     gap: 20px;
-
   }
   
   .main::before {
@@ -83,7 +82,7 @@
     gap: 20px;
     width: 70%;
     justify-items: center;
-    padding: 2rem 0;
+    padding-top: 2rem;
   }
   
   .subCategoria {
@@ -260,26 +259,17 @@
   
   #boton-esperar {
     color: #2e3440;
-    background-color: rgb(179, 239, 234);
+    background-color: rgb(216, 216, 216);
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     padding: 10px;
     width: 100%;
-    text-align: center;
-    font-size: 1.2em;
   }
-    #boton-esperar:hover {
-      transform: scale(1.08);
-      background-color: #51ad6a;
-    }
   
   
   /* Cobrar */
-  .container{
-     margin: 50px 0px;
-  }
   .Resumenpedido {
     background-color: #2e3440;
     color: white;
@@ -289,7 +279,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 60vh;
   }
   
   .Resumenpedido h2 {

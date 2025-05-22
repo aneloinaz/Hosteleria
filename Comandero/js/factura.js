@@ -1,117 +1,95 @@
-import { AlertMessage } from "../../components/AlertComponents.js";
-function mostrarPedidoEnCobrar() {
-    const lista = document.getElementById('listaCobro');
-    lista.innerHTML = '';
-
-    const mesaId = localStorage.getItem('mesaSeleccionada');
-    if (!mesaId) {
-        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
-        return;
-    }
-
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    if (!pedidoGuardado) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
-    }
-
-    const pedido = JSON.parse(pedidoGuardado);
-    if (pedido.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
-    }
-
-    pedido.forEach(item => {
-        const li = document.createElement('li');
-        const subtotal = (item.precio * item.cantidad).toFixed(2);
-        li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
-        lista.appendChild(li);
-    });
-
-    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
-    mostrarTotalEnCobrar();
-    generarQR();
-}
-
-function mostrarTotalEnCobrar() {
-    const pedidoGuardado = localStorage.getItem('pedido');
-    const totalSpan = document.getElementById('total');
-    let total = 0;
-
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    }
-
-    totalSpan.textContent = total.toFixed(2);
-
-    calcularBase();
-    calcularCuota();
-    calcularMediaxComensal();
-}
-
-function calcularBase() {
-    const total = parseFloat(document.getElementById('total').textContent);
-    const base = total / 1.10;
-    document.getElementById('base-iva').textContent = base.toFixed(2);
-}
-
-function calcularCuota() {
-    const total = parseFloat(document.getElementById('total').textContent);
-    const cuota = total * 0.10;
-    document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
-}
-
-function calcularMediaxComensal() {
-    const total = parseFloat(document.getElementById('total').textContent);
-    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
-    document.getElementById('comensales').textContent = numComensales;
-    const mediaxComensal = total / numComensales;
-    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
-}
-
 function imprimirTicket() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
-    ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
+    ventanaImpresion.document.write('<html ><head><title>Ticket de compra</title></head><body>');
     ventanaImpresion.document.write(ticket.innerHTML);
     ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
     ventanaImpresion.document.close();
     ventanaImpresion.print();
     ventanaImpresion.close();
-    let message = 'El ticket se ha impreso correctamente';
-    let redirection = "../../Salas_/sala1.html";
-    AlertMessage(message,redirection);
+    alert('El ticket se ha impreso correctamente');
 }
 
-function mostrarFechaYHora() {
-    const ahora = new Date();
-    const formato = ahora.toLocaleString('es-ES');
-    document.getElementById('fecha-hora').textContent = formato;
+/*const metodoPago = prompt("¿Pago con tarjeta o efectivo? (Escribe 'tarjeta' o 'efectivo')").toLowerCase();
+let mensajePago = '';
+if (metodoPago === 'tarjeta') {
+    PagoTarjeta();
+    mensajePago = 'Pago realizado con tarjeta';
+} else if (metodoPago === 'efectivo') {
+    alert('Pago realizado en efectivo');
+    mensajePago = 'Pago realizado en efectivo';
+} else {
+    alert('Método de pago no válido');
+    mensajePago = 'Método de pago no válido';
 }
+document.getElementById('total').textContent = calcularTotal();
+const metodoPagoDiv = document.createElement('div');
+metodoPagoDiv.textContent = mensajePago;
+document.getElementById('ticket').appendChild(metodoPagoDiv);*/
 
-function mostrarInfoExtra() {
-    const salaMesa = localStorage.getItem('salaMesa') || '1 - A';
-    const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
-    document.getElementById('sala-mesa').textContent = salaMesa;
-    document.getElementById('forma-pago').textContent = formaPago;
-}
+document.addEventListener('DOMContentLoaded', async () => {
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (!mesaId) return;
 
-function generarQR() {
-    const total = document.getElementById('total').textContent;
-    const textoQR = `Total factura: ${total} €`;
-    const urlQR = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(textoQR)}&size=150x150`;
+    // Obtener productos de la comanda (enviados)
+    let productosEnviados = [];
+    const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+    const dataComandas = await resComandas.json();
+    const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+        const detalleData = await detalleRes.json();
+        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+            productosEnviados = productosEnviados.concat(detalleData.detalleComandas);
+        }
+    }
 
-    const contenedorQR = document.getElementById('contenedorQR');
-    contenedorQR.innerHTML = '';
-    const imgQR = document.createElement('img');
-    imgQR.src = urlQR;
-    imgQR.alt = 'Código QR del total';
-    contenedorQR.appendChild(imgQR);
-}
+    // Agrupa productos enviados por idProducto
+    const enviadosAgrupados = {};
+    productosEnviados.forEach(prod => {
+        if (!enviadosAgrupados[prod.idProducto]) {
+            enviadosAgrupados[prod.idProducto] = {
+                nombre: prod.nombre,
+                cantidad: Number(prod.cantidad) || 0,
+                precio: Number(prod.precio) || 0
+            };
+        } else {
+            enviadosAgrupados[prod.idProducto].cantidad += Number(prod.cantidad) || 0;
+        }
+    });
 
-document.addEventListener('DOMContentLoaded', () => {
-    mostrarPedidoEnCobrar();
-    mostrarFechaYHora();
-    mostrarInfoExtra();
+    // Productos del pedido local (no enviados)
+    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+
+    // Mostrar productos en el ticket
+    const section = document.querySelector('#ticket .section');
+    let total = 0;
+
+    // Productos enviados
+    Object.values(enviadosAgrupados).forEach(prod => {
+        const cantidad = Number(prod.cantidad) || 0;
+        const precio = Number(prod.precio) || 0;
+        const subtotal = cantidad * precio;
+        const div = document.createElement('div');
+        div.textContent = `${prod.nombre} x${cantidad} - ${subtotal.toFixed(2)}€`;
+        section.appendChild(div);
+        total += subtotal;
+    });
+
+    // Productos pendientes
+    pedido.forEach(producto => {
+        const cantidad = Number(producto.cantidad) || 0;
+        const precio = Number(producto.precio) || 0;
+        const subtotal = cantidad * precio;
+        const div = document.createElement('div');
+        div.textContent = `${producto.nombre} x${cantidad} - ${subtotal.toFixed(2)}€`;
+        section.appendChild(div);
+        total += subtotal;
+    });
+
+    // Mostrar total
+    document.getElementById('total').textContent = `${total.toFixed(2)}€`;
 });

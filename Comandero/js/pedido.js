@@ -1,8 +1,15 @@
 import { pintarPedidoUlConEstado } from "./menu.js";
 
+// Asegura que solo se añada una vez el listener al evento DOMContentLoaded
+if (!window.domReadyListenerAdded) {
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM completamente cargado");
+  });
+  window.domReadyListenerAdded = true;
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
     console.log("Cargado el DOM en pedido.js");
-
 
     // Recuperar datos del local storage al cargar la página
     const mesaId = localStorage.getItem('mesaSeleccionada');
@@ -11,7 +18,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (pedidoGuardado) {
         const pedido = JSON.parse(pedidoGuardado);
         pedido.forEach(item => {
-            agregarProductoAlPedido(item.nombre, item.precio, item.cantidad, item.id, item.numOrden);
+            // Fuerza el precio a número válido
+            const precio = parseFloat(item.precio);
+            agregarProductoAlPedido(item.nombre, isNaN(precio) ? 0 : precio, item.cantidad, item.id, item.numOrden);
         });
     }
 });
@@ -19,21 +28,21 @@ document.addEventListener('DOMContentLoaded', async function () {
 export function handlerProductos() {
     document.querySelectorAll('.productos').forEach(productoEl => {
         productoEl.addEventListener('click', () => {
-            // Solo lee el valor del dataset, nunca el atributo completo
-            const id = productoEl.dataset.producto; // <-- Esto será solo "6"
+            const id = productoEl.dataset.producto;
             const nombre = productoEl.querySelector('p').textContent;
-            const precio = productoEl.querySelector('span').textContent.replace('€', '');
-            const numOrden = productoEl.dataset.numorden || 1; // minúsculas y valor por defecto
+            const precio = parseFloat(productoEl.dataset.precio); // Siempre float
+            const numOrden = productoEl.dataset.numorden || 1;
             agregarProductoAlPedido(nombre, precio, 1, id, numOrden);
         });
     });
 }
 
-
 export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrden) {
+    precio = parseFloat(precio);
+    if (isNaN(precio)) precio = 0;
+
     const pedidoLista = document.querySelector('.pedido ul');
 
-    // Verifica si el producto ya está en la lista
     let itemExistente = [...pedidoLista.children].find(li => li.dataset.id === id);
 
     if (itemExistente) {
@@ -46,13 +55,12 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
         return;
     }
 
-    // Crear nuevo producto
     const li = document.createElement('li');
     li.dataset.id = id;
     li.dataset.nombre = nombre;
-    li.dataset.precioUnitario = precio;
+    li.dataset.precioUnitario = precio; // Siempre float
     li.dataset.cantidad = cantidad;
-    li.dataset.orden = numOrden || 1; // <-- GUARDA numOrden
+    li.dataset.orden = numOrden || 1;
     li.dataset.estado = false;
 
     li.innerHTML = `
@@ -60,12 +68,8 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
         <span class="precio-total">${(precio * cantidad).toFixed(2)}€</span>
     `;
 
-    // Crear desplegable al hacer click
     li.addEventListener('click', (e) => {
-        // Evitar múltiples desplegables
-        if (li.querySelector('.editor')) {
-            return;
-        }
+        if (li.querySelector('.editor')) return;
 
         const editor = document.createElement('div');
         editor.classList.add('editor');
@@ -75,24 +79,21 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
             <button class="eliminar">Eliminar</button>
         `;
 
-        // Evitar que el editor desaparezca al hacer clic dentro de él
         editor.addEventListener('click', (e) => {
             e.stopPropagation();
         });
 
-        // Guardar cambios
         editor.querySelector('.guardar').addEventListener('click', () => {
             const nuevaCantidad = parseInt(editor.querySelector('input').value);
             if (nuevaCantidad < 1) return;
             li.dataset.cantidad = nuevaCantidad;
             li.querySelector('.cantidad').textContent = `x${nuevaCantidad}`;
             li.querySelector('.precio-total').textContent = `${(nuevaCantidad * precio).toFixed(2)}€`;
-            editor.remove(); // Eliminar el editor al guardar
+            editor.remove();
             actualizarTotal();
             guardarPedidoEnLocalStorage();
         });
 
-        // Eliminar producto
         editor.querySelector('.eliminar').addEventListener('click', () => {
             li.remove();
             actualizarTotal();
@@ -107,21 +108,23 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
     guardarPedidoEnLocalStorage();
 }
 
-
 function actualizarTotal() {
     const totalSpan = document.querySelector('.total span');
     const pedidoLista = document.querySelector('.pedido ul');
-    let total = 0;
+    let totalPendientes = 0;
 
     [...pedidoLista.children].forEach(li => {
-        const cantidad = parseInt(li.dataset.cantidad);
-        const precio = parseFloat(li.dataset.precioUnitario);
-        total += cantidad * precio;
+        const cantidad = parseInt(li.dataset.cantidad) || 0;
+        const precio = parseFloat(li.dataset.precioUnitario) || 0;
+        totalPendientes += cantidad * precio;
     });
+
+    // Suma el total de productos ya enviados (de la comanda)
+    const totalEnviados = window.totalEnviadosComanda || 0;
+    const total = totalPendientes + totalEnviados;
 
     totalSpan.textContent = `${total.toFixed(2)}€`;
 }
-
 
 function guardarPedidoEnLocalStorage() {
     const mesaId = localStorage.getItem('mesaSeleccionada');
@@ -131,9 +134,9 @@ function guardarPedidoEnLocalStorage() {
         return {
             id: li.dataset.id,
             nombre: li.dataset.nombre,
-            precio: parseFloat(li.dataset.precioUnitario),
-            cantidad: parseInt(li.dataset.cantidad),
-            numOrden: parseInt(li.dataset.orden), // <-- GUARDA numOrden
+            precio: parseFloat(li.dataset.precioUnitario) || 0, // <-- SIEMPRE FLOAT Y NUNCA NaN
+            cantidad: parseInt(li.dataset.cantidad) || 0,
+            numOrden: parseInt(li.dataset.orden) || 1,
             estado: li.dataset.estado
         };
     });
