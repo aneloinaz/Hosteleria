@@ -1,4 +1,28 @@
 import { AlertMessage } from "../../components/AlertComponents.js";
+document.addEventListener('DOMContentLoaded', async () => {
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (!mesaId) return;
+
+    // Obtener productos de la comanda (enviados)
+    let productosEnviados = [];
+    try {
+        const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+        const dataComandas = await resComandas.json();
+        const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+        for (const comanda of comandas) {
+            const idComanda = comanda.idComanda;
+            if (!idComanda) continue;
+            const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+            const detalleData = await detalleRes.json();
+            if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+                productosEnviados = productosEnviados.concat(detalleData.detalleComandas.map(d => d.idProducto));
+            }
+        }
+    } catch (error) {
+        console.error("Error obteniendo productos enviados:", error);
+    }
+});
+
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
@@ -101,3 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarFechaYHora();
     mostrarInfoExtra();
 });
+
+if (!window.domReadyListenerAdded) {
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM completamente cargado");
+  });
+  window.domReadyListenerAdded = true;
+}

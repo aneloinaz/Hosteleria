@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
         const detalleData = await detalleRes.json();
         if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
-            productosEnviados = productosEnviados.concat(detalleData.detalleComandas);
+            productosEnviados = productosEnviados.concat(detalleData.detalleComandas.map(d => d.idProducto));
         }
     }
 
