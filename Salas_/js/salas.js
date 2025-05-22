@@ -1,5 +1,6 @@
 import { actualizarEstado } from "./mesasEstado.js";
-document.addEventListener('DOMContentLoaded', async () => {
+
+document.addEventListener('DOMContentLoaded', async () => {    
     localStorage.clear();
     let cont  = 0;
     async function actualizarMesas() {
@@ -40,4 +41,13 @@ async function getMesas(idSala){
     const data = await response.json();
     return data;
 }
+
+
+
+const btnRes = document.getElementById('reservar');
+btnRes.addEventListener('click', function() {
+    window.location.href = '../Reservas/html/index.html';
+  
+  })
+
 

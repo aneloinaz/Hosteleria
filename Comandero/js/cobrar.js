@@ -1,83 +1,116 @@
+import { AlertMessage } from "../../components/AlertComponents.js";
+import { AlertConfirm } from "../../components/AlertComponents.js";
+
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("boton-tarjeta").addEventListener('click',PagoTarjeta);
+    document.getElementById("boton-efectivo").addEventListener('click',PagoEfectivo);
+    document.getElementById("boton-cancelar").addEventListener('click',async ()=>{cancelarPago()});
+
     mostrarPedidoEnCobrar();
     mostrarTotalEnCobrar();
-    
-    
 });
-
 function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
-    fetch("https://apiostalaritza.lhusurbil.eus/api/GetDetallePedido") // ← URL real de la API, sin "swagger/index.html"
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(pedido => {
-            if (!pedido || pedido.length === 0) {
-                lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-                return;
-            }
-            pedido.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.nombre} x${item.cantidad} - ${(item.precio * item.cantidad).toFixed(2)}€`;
-                lista.appendChild(li);
-            });
-        })
-        .catch(error => {
-            console.error('Error al obtener el pedido:', error);
-            lista.innerHTML = '<li>Error al cargar el pedido.</li>';
-        });
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (!mesaId) {
+        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        return;
+    }
+
+    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    if (!pedidoGuardado) {
+        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        return;
+    }
+
+    const pedido = JSON.parse(pedidoGuardado);
+    if (pedido.length === 0) {
+        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        return;
+    }
+
+    pedido.forEach(item => {
+        const li = document.createElement('li');
+        const subtotal = (item.precio * item.cantidad).toFixed(2);
+        li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
+        lista.appendChild(li);
+    });
+
+    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
+    mostrarTotalEnCobrar();
+
 }
 
+function mostrarTotalEnCobrar() {
+    const pedidoGuardado = localStorage.getItem('pedido');
+    const totalSpan = document.getElementById('total');
+    let total = 0;
 
-    function mostrarTotalEnCobrar() {
-      const pedidoGuardado = localStorage.getItem("pedido");
-      const totalSpan = document.getElementById("total");
-      let total = 0;
-
-      if (pedidoGuardado) {
+    if (pedidoGuardado) {
         const pedido = JSON.parse(pedidoGuardado);
         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-      }
+    }
 
     totalSpan.textContent = total.toFixed(2);
 }
 
 
-   function cancelarPago() {
-    if (confirm('¿Estás seguro de cancelar la operació?')) {
+   async function cancelarPago() {
+    let message = '¿Aceptas anular la operación?';
+    if ( await AlertConfirm(message)) {
         localStorage.removeItem('pedido'); 
-        resumenTicket(); 
-        window.location.href = 'Comandero/html/sala1.html';
+        window.location.href = './menu.html';
     } else {
-        alert('Operacion cancelada');
-      
+        message = 'Operacion cancelada';
+        AlertMessage(message);
     }
 }
 
 function PagoTarjeta() {
-    alert('La operación se ha realizado con éxito');
-    window.location.href = 'factura.html';
+    let message = 'La operación se ha realizado con éxito';
+    let redirection = '../../Salas_/sala1.html';
+    AlertMessage(message,redirection);
+    //al llegar a salas el localStorage se borra automaticamente
+    // const mesaId = localStorage.getItem('mesaSeleccionada');
+    // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+    // window.location.href = 'salas1.html';
 }
 
 function PagoEfectivo() {
-    let total = totalTicket(); // Obtener el total desde la función totalTicket()
+    const pedidoGuardado = localStorage.getItem("pedido");
+    let total = 0;
+    if (pedidoGuardado) {
+        const pedido = JSON.parse(pedidoGuardado);
+        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+    }
     let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
+    if (isNaN(recibido)) {
+        alert('Por favor, ingrese una cantidad válida.');
+        return;
+    }
     let cambio = recibido - total;
 
     if (cambio === 0) {
-        alert('Importe exacto.');
-        const mesaId = localStorage.getItem('mesaSeleccionada');
-        localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        let message = 'Importe Exacto';
+        let redirection = '../../Salas_/sala1.html';
+        //al llegar a salas se borra todo automaticamente
+        // const mesaId = localStorage.getItem('mesaSeleccionada');
+        // localStorage.removeItem(`pedido_mesa_${mesaId}');
+
+        AlertMessage(message,redirection);
+        
         window.location.href = 'salas1.html';
     } else if (cambio > 0) {
-        alert(`Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`);
-        const mesaId = localStorage.getItem('mesaSeleccionada');
-        localStorage.removeItem(`pedido_mesa_${mesaId}`);
-        window.location.href = 'salas1.html';
+        let message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
+        let redirection = '../../Salas_/sala1.html';
+        
+        //al llegar a salas se borra todo automaticamente
+        // const mesaId = localStorage.getItem('mesaSeleccionada');
+        // localStorage.removeItem(`pedido_mesa_${mesaId}`);
+        // window.location.href = 'salas1.html';
+
+        AlertMessage(message,redirection);
     }
 }
