@@ -88,7 +88,7 @@ function eliminarReserva(idreserva){
       })
       .catch(error => {
         console.error("Error al eliminar:", error);
-        alert("No se pudo eliminar la reserva ssSS");
+        
       });
   }
 
