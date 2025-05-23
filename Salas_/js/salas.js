@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Llamada inicial
     await actualizarMesas();
     // Actualización cada 5 segundos
-    setInterval(actualizarEstado, 2000);
+    setInterval(actualizarEstado, 5000);
 });
 
 const generarMesas = (mesas) => {

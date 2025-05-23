@@ -88,7 +88,7 @@ async function cancelarPago() {
     if (await AlertConfirm(message)) {
         const mesaId = localStorage.getItem('mesaSeleccionada');
         localStorage.removeItem(`pedido_mesa_${mesaId}`);
-        resumenTicket();
+
         window.location.href = './menu.html';
     } else {
         AlertMessage("Operación cancelada");
