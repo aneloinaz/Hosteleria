@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded",()=>{
    const fecha = localStorage.getItem("fecha");
     const numComensales = localStorage.getItem("personas");
     const numMesa = localStorage.getItem("mesaSeleccionada");
-    const resumen = document.querySelector(".FechaReserva");
-    const datos = resumen.querySelectorAll("p");
+    const resumen = document.getElementsByClassName("FechaReserva");
+    const datos = resumen[0].querySelectorAll("p");
  
     if (datos.length >= 1) {
       datos[0].innerHTML = `<p><strong>DÍA:</strong>${fecha}</p>`;
