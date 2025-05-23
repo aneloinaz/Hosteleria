@@ -31,17 +31,18 @@ export function handlerProductos() {
             const nombre = productoEl.querySelector('p').textContent;
             const precio = parseFloat(productoEl.dataset.precio); // Siempre float
             const numOrden = productoEl.dataset.numorden || 1;
-            agregarProductoAlPedido(nombre, precio, 1, id, numOrden);
+            agregarProductoAlPedido(nombre, precio, 1, id, numOrden,false);
         });
     });
 }
 
 export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrden, estado = false) {
     precio = parseFloat(precio);
-    
+    console.log("aqui estoy: "+nombre+""+id);
     // Validación del precio y la cantidad
     if (isNaN(precio) || precio <= 0 || cantidad <= 0) {
         console.warn(`Producto inválido no agregado: ${nombre}, Precio: ${precio}, Cantidad: ${cantidad}`);
+        console.log("aqui estoy");
         return; // No agregar el producto si el precio o la cantidad son inválidos
     }
 
@@ -60,7 +61,7 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
         guardarPedidoEnLocalStorage(); // Guardamos el pedido con la nueva cantidad
         return;
     }
-
+    console.log("aqui estoy en crear producto: "+nombre+""+id);
     // Si el producto no existe, lo agregamos como un nuevo producto
     const li = document.createElement('li');
     li.dataset.id = id;
@@ -111,16 +112,18 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
     });
 
     pedidoLista.appendChild(li);
+     console.log("aqui estoy en casi al  final: "+nombre+""+id);
     actualizarTotal();
-    guardarPedidoEnLocalStorage(); // Guardamos el nuevo pedido
+    //se podria enviar
+    guardarPedidoEnLocalStorage();
 }
 
 function actualizarTotal() {
     const totalSpan = document.querySelector('.total span');
-    const pedidoLista = document.querySelector('.pedido ul');
+    const pedidoLista = document.querySelectorAll('.pedido ul li');
     let totalPendientes = 0;
 
-    [...pedidoLista.children].forEach(li => {
+    Array.from(pedidoLista).forEach(li => {
         const cantidad = parseInt(li.dataset.cantidad) || 0;
         const precio = parseFloat(li.dataset.precioUnitario) || 0;
         totalPendientes += cantidad * precio;
@@ -137,11 +140,11 @@ function guardarPedidoEnLocalStorage() {
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) return;
 
-    const pedidoLista = document.querySelector('.pedido ul');
+    const pedidoLista = document.querySelectorAll('.pedido>ul>li');
     
     // Crear una lista con todos los productos
-    const pedido = [...pedidoLista.children].map(li => {
-        return {
+    const pedido = Array.from(pedidoLista).map(li => {
+        return {  
             id: li.dataset.id,
             nombre: li.dataset.nombre,
             precio: parseFloat(li.dataset.precioUnitario) || 0, // Siempre float y nunca NaN
@@ -150,7 +153,7 @@ function guardarPedidoEnLocalStorage() {
             estado: li.dataset.estado // Asegúrate de guardar el estado también (si fue enviado o no)
         };
     });
-
+    console.log(pedido);
     // Guardar el pedido completo con las cantidades actualizadas
     localStorage.setItem(`pedido_mesa_${mesaId}`, JSON.stringify(pedido));
 }
