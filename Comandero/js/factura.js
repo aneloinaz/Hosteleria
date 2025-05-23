@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarFechaYHora();
     mostrarInfoExtra();
     document.getElementById("boton-imprimir").addEventListener("click", imprimirTicket);
+    document.getElementById("boton-finalizar").addEventListener("click", finalizarSinImprimir);
 });
 
 async function mostrarPedidoDesdeAPI() {
@@ -106,7 +107,7 @@ function generarQR() {
     contenedorQR.appendChild(imgQR);
 }
 
-function imprimirTicket() {
+async function imprimirTicket() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
     ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
@@ -116,5 +117,62 @@ function imprimirTicket() {
     ventanaImpresion.print();
     ventanaImpresion.close();
 
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (mesaId) {
+        await cerrarComandasYEliminarReserva(mesaId);
+    }
+
     AlertMessage('El ticket se ha impreso correctamente', '../../Salas_/sala1.html');
+}
+
+async function finalizarSinImprimir() {
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (mesaId) {
+        await cerrarComandasYEliminarReserva(mesaId);
+    }
+    AlertMessage('Operación finalizada sin imprimir', '../../Salas_/sala1.html');
+}
+
+async function cerrarComandasYEliminarReserva(mesaId) {
+    try {
+        // 1. CERRAR TODAS LAS COMANDAS DE ESA MESA
+        const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+        const dataComandas = await resComandas.json();
+        const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+        for (const comanda of comandas) {
+            const idComanda = comanda.idComanda;
+            if (!idComanda) continue;
+
+            const res = await fetch(`https://apiostalaritza.lhusurbil.eus/PutCerrarComanda?idComanda=${idComanda}`, {
+                method: 'PUT'
+            });
+
+            if (!res.ok) {
+                console.warn(`No se pudo cerrar la comanda ${idComanda}`);
+            }
+        }
+
+        // 2. ELIMINAR LA RESERVA DE ESA MESA (si existe) PARA HOY
+        const hoy = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+        const resReservas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetReservasDia?fecha=${hoy}`);
+        const dataReservas = await resReservas.json();
+        const reservas = Array.isArray(dataReservas.reservas) ? dataReservas.reservas : [];
+
+        const reservaMesa = reservas.find(r => r.numMesa == mesaId);
+        if (reservaMesa && reservaMesa.idReserva) {
+            const resDelete = await fetch(`https://apiostalaritza.lhusurbil.eus/DeleteReserva?idreserva=${reservaMesa.idReserva}`, {
+                method: 'DELETE'
+            });
+
+            if (!resDelete.ok) {
+                console.warn(`Error al eliminar reserva ${reservaMesa.idReserva}`);
+            } else {
+                console.log(`Reserva ${reservaMesa.idReserva} eliminada`);
+            }
+        }
+
+    } catch (error) {
+        console.error("Error cerrando comandas y/o eliminando reserva:", error);
+    }
 }

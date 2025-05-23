@@ -95,13 +95,14 @@ async function cancelarPago() {
     }
 }
 
-function PagoTarjeta() {
+async function PagoTarjeta() {
     let message = "La operación se ha realizado con éxito";
     let redirection = "../../Salas_/sala1.html";
+
     AlertMessage(message, redirection);
 }
 
-function PagoEfectivo(pedido) {
+async function PagoEfectivo(pedido) {
     if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
         AlertMessage("No hay productos cargados para cobrar.");
         return;
@@ -128,10 +129,14 @@ function PagoEfectivo(pedido) {
     if (cambio === 0) {
         message = 'Pago realizado con éxito. Importe Exacto';
         redirection = 'factura.html';
+
+
         AlertMessage(message, redirection);
     } else if (cambio > 0) {
         message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
         redirection = 'factura.html';
+
+
         AlertMessage(message, redirection);
     } else {
         message = 'El importe recibido es insuficiente.';
@@ -139,90 +144,4 @@ function PagoEfectivo(pedido) {
     }
 }
 
-// Función pendiente por implementar
-function resumenTicket() {
-    // Implementar lógica si es necesario
-}
 
-
-// 
-
-
-
-
-
-
-
-
-
-// function mostrarTotalEnCobrar() {
-//     const pedidoGuardado = localStorage.getItem('pedido');
-//     const totalSpan = document.getElementById('total');
-//     let total = 0;
-
-//     if (pedidoGuardado) {
-//         const pedido = JSON.parse(pedidoGuardado);
-//         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-//     }
-
-//     totalSpan.textContent = total.toFixed(2);
-// }
-
-
-//    async function cancelarPago() {
-//     let message = '¿Aceptas anular la operación?';
-//     if ( await AlertConfirm(message)) {
-//         localStorage.removeItem('pedido'); 
-//         window.location.href = './menu.html';
-//     } else {
-//         message = 'Operacion cancelada';
-//         AlertMessage(message);
-//     }
-// }
-
-// function PagoTarjeta() {
-//     let message = 'La operación se ha realizado con éxito';
-//     let redirection = '../../Salas_/sala1.html';
-//     AlertMessage(message,redirection);
-//     //al llegar a salas el localStorage se borra automaticamente
-//     // const mesaId = localStorage.getItem('mesaSeleccionada');
-//     // localStorage.removeItem(`pedido_mesa_${mesaId}`);
-//     // window.location.href = 'salas1.html';
-// }
-
-// function PagoEfectivo() {
-//     const pedidoGuardado = localStorage.getItem("pedido");
-//     let total = 0;
-//     if (pedidoGuardado) {
-//         const pedido = JSON.parse(pedidoGuardado);
-//         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-//     }
-//     let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
-//     if (isNaN(recibido)) {
-//         alert('Por favor, ingrese una cantidad válida.');
-//         return;
-//     }
-//     let cambio = recibido - total;
-
-//     if (cambio === 0) {
-//         let message = 'Importe Exacto';
-//         let redirection = '../../Salas_/sala1.html';
-//         //al llegar a salas se borra todo automaticamente
-//         // const mesaId = localStorage.getItem('mesaSeleccionada');
-//         // localStorage.removeItem(`pedido_mesa_${mesaId}`);
-
-//         AlertMessage(message,redirection);
-        
-//         window.location.href = 'salas1.html';
-//     } else if (cambio > 0) {
-//         let message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
-//         let redirection = '../../Salas_/sala1.html';
-        
-//         //al llegar a salas se borra todo automaticamente
-//         // const mesaId = localStorage.getItem('mesaSeleccionada');
-//         // localStorage.removeItem(`pedido_mesa_${mesaId}`);
-//         // window.location.href = 'salas1.html';
-
-//         AlertMessage(message,redirection);
-//     }
-// }
