@@ -1,5 +1,6 @@
 export async function actualizarEstado(){
-      const fecha = new Date().toISOString().slice(0,10);
+      //const fecha = new Date().toISOString().slice(0,10);
+      const fecha=localStorage.getItem("fecha");
   const mesas = document.getElementsByClassName("mesa");
 
     const estados = await cargarEstadosDesdeJSON(fecha);
@@ -31,13 +32,13 @@ function cambiarColorMesa(mesaElemento, estado) {
      mesaElemento.addEventListener('click', function() {
                 const idMesa = this.getAttribute('data-id'); 
                 localStorage.setItem('mesaSeleccionada', idMesa);
-                window.location.href = 'info1.html'});
+                window.location.href = '/Reservas/html/iconfirmacion.html'});
    } else if (estado==1 || estado==2 || estado==3) {
      mesaElemento.style.backgroundColor = "red"; // Reservado
-     mesaElemento.addEventListener('click', function() {
+     /*mesaElemento.addEventListener('click', function() {
                 const idMesa = this.getAttribute('data-id'); 
                 localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
+                 window.location.href = '/Reservas/html/iconfirmacion.html'});*/
    };
 }
 

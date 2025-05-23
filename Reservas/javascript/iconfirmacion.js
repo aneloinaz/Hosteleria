@@ -2,12 +2,14 @@
 document.addEventListener("DOMContentLoaded",()=>{
    const fecha = localStorage.getItem("fecha");
     const numComensales = localStorage.getItem("personas");
+    const numMesa = localStorage.getItem("mesaSeleccionada");
     const resumen = document.querySelector(".FechaReserva");
     const datos = resumen.querySelectorAll("p");
-  
+ 
     if (datos.length >= 1) {
       datos[0].innerHTML = `<p><strong>DÍA:</strong>${fecha}</p>`;
       datos[1].innerHTML = `<p><strong>Personas:</strong>${numComensales}</p> `;
+      datos[2].innerHTML =`<p><strong>Mesa:</strong>${numMesa}</p>`
     }
   
     // Insertar datos en los párrafos del resumen
@@ -28,8 +30,8 @@ function DatosUsuario(){
       const observaciones = document.getElementById("comentarios").value;
       const fecha = localStorage.getItem("fecha");
       const numComensales = localStorage.getItem("personas");
-      const numMesa = localStorage.getItem("numMesa");
-    
+      const numMesa = localStorage.getItem("mesaSeleccionada");
+   
      
 // Obtener valores del formulario
      
@@ -54,9 +56,9 @@ function DatosUsuario(){
   })
   .then(response => response.json())
   .then(data => {
-    alert(data.mensaje || "Reserva enviada con éxito");
+    alert(data.mensaje || numMesa);
     localStorage.clear();
-    window.location.href = "sala1.html";
+    window.location.href = "/Reservas/html/index.html";
   })
   .catch(error => {
     console.error("Error al enviar reserva:", error);
