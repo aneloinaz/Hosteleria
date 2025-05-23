@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const personas = document.getElementById('personas').value;
       const fecha = document.getElementById('fecha').value;
       const hora = '12:00'; // fija, como indica el HTML
-      const mesa = localStorage.getItem("mesaSeleccionada");
+      const mesa = document.("mesaSeleccionada");
     if (!mesa) {
       alert("Por favor seleccione una mesa antes de continuar.");
       e.preventDefault();

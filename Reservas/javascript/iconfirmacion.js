@@ -56,7 +56,7 @@ function DatosUsuario(){
   .then(data => {
     alert(data.mensaje || "Reserva enviada con éxito");
     localStorage.clear();
-    window.location.href = "index.html";
+    window.location.href = "sala1.html";
   })
   .catch(error => {
     console.error("Error al enviar reserva:", error);

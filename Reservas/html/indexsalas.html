@@ -7,12 +7,13 @@
     <title></title>
     <link rel="stylesheet" href="/Reservas/css/index.css">
     <link rel="stylesheet" href="/Reservas/css/salas.css">
-    <script src="/Reservas/javascript/indexsalas.js"></script>
+    <script src="/Reservas/javascript/isalas.js"></script>
+
 </head>
 
 <body>
     <div class="container">
-        <h1>RESERVE EN LHUSURBIL</h1>
+        <h2>RESERVE EN LHUSURBIL</h2>
         <p class="direccion">De Etarte Bidea, 20160 Zubieta, Gipuzkoa</p>
 
         <form id="FechaReserva" method="POST">
@@ -23,18 +24,17 @@
                 <label for="fecha">Fecha:</label><br>
                 <input type="date" id="fecha" name="fecha" required><br><br>
                 <label for="hora">Hora: 12:00</label><br><br>
+                <button onclick="function FechaReserva()" class="continuar">CONTINUAR</button>
                 <!--<input type="time" id="hora" name="hora" required><br><br>-->
-                <h2>Seleccione su mesa en la sala:</h2>
-                <div id="contenedor-sala1">
-                    <h3>Sala 1</h3>
-                    <div id="plano-sala1" class="restaurante"></div>
+               <script src="index.js"></script>
+                <div id="sala1">
+                     <h2>Seleccione su mesa en la sala:</h2>
+                    <a href="/Reservas/Salas_/sala1.html">elige mesa</a>
+                   <button type="submit" class="continuar">CONTINUAR</button>
                 </div>
 
-                <div id="contenedor-sala2">
-                    <h3>Sala 2</h3>
-                    <div id="plano-sala2" class="restaurante"></div>
-                </div>
-                <button type="submit" class="continuar">CONTINUAR</button>
+                
+                
             </div>
         </form>
         <p class="contacto">Llámenos al <strong style="color:#003366;">943364600</strong> si son más de 8 personas o si
