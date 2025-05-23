@@ -31,29 +31,14 @@ function cambiarColorMesa(mesaElemento, estado) {
      mesaElemento.addEventListener('click', function() {
                 const idMesa = this.getAttribute('data-id'); 
                 localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = 'info1.html'});
-   } else if (estado==1) {
+                window.location.href = 'info1.html'});
+   } else if (estado==1 || estado==2 || estado==3) {
      mesaElemento.style.backgroundColor = "red"; // Reservado
      mesaElemento.addEventListener('click', function() {
                 const idMesa = this.getAttribute('data-id'); 
                 localStorage.setItem('mesaSeleccionada', idMesa);
                  window.location.href = '../Comandero/html/menu.html'});
-   } else if (estado==2) {
-     mesaElemento.style.backgroundColor = "orange"; // Comanda pedida
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   } else if (estado==3) {
-     mesaElemento.style.backgroundColor = "blue"; // Finalizado
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   }
-
-  
-
+   };
 }
 
 async function actualizarContador(fecha){
