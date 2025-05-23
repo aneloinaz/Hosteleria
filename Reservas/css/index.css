@@ -2,7 +2,7 @@ body {
     font-family: sans-serif;
     margin: 0;
     padding: 0;
-    background: #f9f9f9;
+    background: #1F2937;
     color: #333;
   }
   
@@ -41,7 +41,7 @@ body {
   .continuar {
     background: #0a2e60;
     color: white;
-    padding: 12px 20px;
+    padding: 12px 20px;  
     font-size: 16px;
     border: none;
     border-radius: 6px;
@@ -54,3 +54,13 @@ body {
     font-size: 14px;
   }
   
+  .volver{
+    float:right;
+    margin: 50px;
+    padding : 5px;
+    font-weight: bold;
+    border-color: black;
+
+    
+
+  }

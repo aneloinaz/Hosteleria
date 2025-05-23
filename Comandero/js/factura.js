@@ -1,5 +1,16 @@
 import { AlertMessage } from "../../components/AlertComponents.js";
-function mostrarPedidoEnCobrar() {
+
+let pedidoActual = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarPedidoDesdeAPI();
+    mostrarFechaYHora();
+    mostrarInfoExtra();
+    document.getElementById("boton-imprimir").addEventListener("click", imprimirTicket);
+    document.getElementById("boton-finalizar").addEventListener("click", finalizarSinImprimir);
+});
+
+async function mostrarPedidoDesdeAPI() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
@@ -9,17 +20,28 @@ function mostrarPedidoEnCobrar() {
         return;
     }
 
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    if (!pedidoGuardado) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
+    // Obtener productos desde API
+    let pedido = [];
+    const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+    const dataComandas = await resComandas.json();
+    const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+        const detalleData = await detalleRes.json();
+        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+            pedido = pedido.concat(detalleData.detalleComandas);
+        }
     }
 
-    const pedido = JSON.parse(pedidoGuardado);
     if (pedido.length === 0) {
         lista.innerHTML = '<li>No hay productos en el pedido.</li>';
         return;
     }
+
+    pedidoActual = pedido;
 
     pedido.forEach(item => {
         const li = document.createElement('li');
@@ -28,60 +50,35 @@ function mostrarPedidoEnCobrar() {
         lista.appendChild(li);
     });
 
-    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
-    mostrarTotalEnCobrar();
+    mostrarTotalEnCobrar(pedido);
     generarQR();
 }
 
-function mostrarTotalEnCobrar() {
-    const pedidoGuardado = localStorage.getItem('pedido');
+function mostrarTotalEnCobrar(pedido) {
     const totalSpan = document.getElementById('total');
-    let total = 0;
-
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    }
-
+    const total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
     totalSpan.textContent = total.toFixed(2);
 
-    calcularBase();
-    calcularCuota();
-    calcularMediaxComensal();
+    calcularBase(total);
+    calcularCuota(total);
+    calcularMediaxComensal(total);
 }
 
-function calcularBase() {
-    const total = parseFloat(document.getElementById('total').textContent);
+function calcularBase(total) {
     const base = total / 1.10;
     document.getElementById('base-iva').textContent = base.toFixed(2);
 }
 
-function calcularCuota() {
-    const total = parseFloat(document.getElementById('total').textContent);
+function calcularCuota(total) {
     const cuota = total * 0.10;
     document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
 }
 
-function calcularMediaxComensal() {
-    const total = parseFloat(document.getElementById('total').textContent);
+function calcularMediaxComensal(total) {
     const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
     document.getElementById('comensales').textContent = numComensales;
-    const mediaxComensal = total / numComensales;
-    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
-}
-
-function imprimirTicket() {
-    const ticket = document.getElementById('ticket');
-    const ventanaImpresion = window.open('', '', 'width=600,height=400');
-    ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
-    ventanaImpresion.document.write(ticket.innerHTML);
-    ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
-    ventanaImpresion.document.close();
-    ventanaImpresion.print();
-    ventanaImpresion.close();
-    let message = 'El ticket se ha impreso correctamente';
-    let redirection = "../../Salas_/sala1.html";
-    AlertMessage(message,redirection);
+    const media = total / numComensales;
+    document.getElementById('mediaxComensal').textContent = media.toFixed(2);
 }
 
 function mostrarFechaYHora() {
@@ -91,7 +88,7 @@ function mostrarFechaYHora() {
 }
 
 function mostrarInfoExtra() {
-    const salaMesa = localStorage.getItem('salaMesa') || '1 - A';
+    const salaMesa = localStorage.getItem('salaMesa') || 'Sala 1 - Mesa 1';
     const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
     document.getElementById('sala-mesa').textContent = salaMesa;
     document.getElementById('forma-pago').textContent = formaPago;
@@ -110,8 +107,72 @@ function generarQR() {
     contenedorQR.appendChild(imgQR);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    mostrarPedidoEnCobrar();
-    mostrarFechaYHora();
-    mostrarInfoExtra();
-});
+async function imprimirTicket() {
+    const ticket = document.getElementById('ticket');
+    const ventanaImpresion = window.open('', '', 'width=600,height=400');
+    ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
+    ventanaImpresion.document.write(ticket.innerHTML);
+    ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
+    ventanaImpresion.document.close();
+    ventanaImpresion.print();
+    ventanaImpresion.close();
+
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (mesaId) {
+        await cerrarComandasYEliminarReserva(mesaId);
+    }
+
+    AlertMessage('El ticket se ha impreso correctamente', '../../Salas_/sala1.html');
+}
+
+async function finalizarSinImprimir() {
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (mesaId) {
+        await cerrarComandasYEliminarReserva(mesaId);
+    }
+    AlertMessage('Operación finalizada sin imprimir', '../../Salas_/sala1.html');
+}
+
+async function cerrarComandasYEliminarReserva(mesaId) {
+    try {
+        // 1. CERRAR TODAS LAS COMANDAS DE ESA MESA
+        const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+        const dataComandas = await resComandas.json();
+        const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+        for (const comanda of comandas) {
+            const idComanda = comanda.idComanda;
+            if (!idComanda) continue;
+
+            const res = await fetch(`https://apiostalaritza.lhusurbil.eus/PutCerrarComanda?idComanda=${idComanda}`, {
+                method: 'PUT'
+            });
+
+            if (!res.ok) {
+                console.warn(`No se pudo cerrar la comanda ${idComanda}`);
+            }
+        }
+
+        // 2. ELIMINAR LA RESERVA DE ESA MESA (si existe) PARA HOY
+        const hoy = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+        const resReservas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetReservasDia?fecha=${hoy}`);
+        const dataReservas = await resReservas.json();
+        const reservas = Array.isArray(dataReservas.reservas) ? dataReservas.reservas : [];
+
+        const reservaMesa = reservas.find(r => r.numMesa == mesaId);
+        if (reservaMesa && reservaMesa.idReserva) {
+            const resDelete = await fetch(`https://apiostalaritza.lhusurbil.eus/DeleteReserva?idreserva=${reservaMesa.idReserva}`, {
+                method: 'DELETE'
+            });
+
+            if (!resDelete.ok) {
+                console.warn(`Error al eliminar reserva ${reservaMesa.idReserva}`);
+            } else {
+                console.log(`Reserva ${reservaMesa.idReserva} eliminada`);
+            }
+        }
+
+    } catch (error) {
+        console.error("Error cerrando comandas y/o eliminando reserva:", error);
+    }
+}

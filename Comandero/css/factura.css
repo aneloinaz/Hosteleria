@@ -46,45 +46,43 @@ body {
   padding-top: 5px;
 }
 
-#contenedorQR{
-  display: flex;
-  justify-content: center;
-  margin-top: 15px;
-}
-/*Estilo para la comada*/
+#boton-imprimir {
+  background: #0a2e60;
+  color: rgb(255, 255, 255);
+  padding: 12px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-color: #000000;
+  border-width: 2px;
+  border-style: solid;
+ font-weight:bold ;
+  
+  
 
-
-
-
-/*Resposive*/
-@media (max-width: 768px){
-  #ticket {
-    width: 100%;
-    padding: 10px;
-  }
-  .empresa {
-    font-size: 18px;
-  }
-  .section {
-    margin: 5px 0;
-  }
-  .items td {
-    padding: 2px 0;
-  }
 }
 
-@media (max-width: 480px){
-  #ticket {
-    width: 100%;
-    padding: 5px;
-  }
-  .empresa {
-    font-size: 16px;
-  }
-  .section {
-    margin: 3px 0;
-  }
-  .items td {
-    padding: 1px 0;
-  }
+#boton-imprimir:hover {
+  background: #000000;
+  color: white;
+}
+
+#boton-finalizar{
+  background: #fa9600;
+  color: rgb(0, 0, 0);
+  padding: 12px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+  float: right;
+  border-width: 2px;
+  border-style: solid;
+  font-weight:bold ;
+}
+
+#boton-finalizar:hover {
+  background: #000000;
+  color: white;
 }

@@ -1,15 +1,18 @@
 import { AlertMessage } from "../../components/AlertComponents.js";
 import { AlertConfirm } from "../../components/AlertComponents.js";
 
+// Variable global para guardar el pedido actual
+let pedidoActual = [];
+
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById("boton-tarjeta").addEventListener('click',PagoTarjeta);
-    document.getElementById("boton-efectivo").addEventListener('click',PagoEfectivo);
-    document.getElementById("boton-cancelar").addEventListener('click',async ()=>{cancelarPago()});
+    document.getElementById("boton-tarjeta").addEventListener('click', PagoTarjeta);
+    document.getElementById("boton-efectivo").addEventListener('click', () => PagoEfectivo(pedidoActual));
+    document.getElementById("boton-cancelar").addEventListener('click', async () => { cancelarPago() });
 
     mostrarPedidoEnCobrar();
-    mostrarTotalEnCobrar();
 });
-function mostrarPedidoEnCobrar() {
+
+async function mostrarPedidoEnCobrar() {
     const lista = document.getElementById('listaCobro');
     lista.innerHTML = '';
 
@@ -19,98 +22,125 @@ function mostrarPedidoEnCobrar() {
         return;
     }
 
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    if (!pedidoGuardado) {
+    // Obtener productos de la comanda
+    let pedidoGuardado = [];
+
+    // 1. Recuperar productos de la API (comandas abiertas)
+    const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+    const dataComandas = await resComandas.json();
+    const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+    for (const comanda of comandas) {
+        const idComanda = comanda.idComanda;
+        if (!idComanda) continue;
+        const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+        const detalleData = await detalleRes.json();
+        if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+            pedidoGuardado = pedidoGuardado.concat(detalleData.detalleComandas);
+        }
+    }
+
+    // 2. Recuperar productos del localStorage (productos no enviados)
+    const pedidoLocal = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    if (pedidoLocal) {
+        try {
+            const productosLocales = JSON.parse(pedidoLocal);
+            if (Array.isArray(productosLocales)) {
+                // Fusionamos los productos de la API con los productos del localStorage
+                pedidoGuardado = pedidoGuardado.concat(productosLocales);
+            }
+        } catch (e) {
+            console.error("Error al parsear productos locales:", e);
+        }
+    }
+
+    if (!pedidoGuardado || pedidoGuardado.length === 0) {
         lista.innerHTML = '<li>No hay productos en el pedido.</li>';
         return;
     }
 
-    const pedido = JSON.parse(pedidoGuardado);
-    if (pedido.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
-    }
+    // Guardar el pedido actual en la variable global
+    pedidoActual = pedidoGuardado;
 
-    pedido.forEach(item => {
+    pedidoGuardado.forEach(item => {
         const li = document.createElement('li');
         const subtotal = (item.precio * item.cantidad).toFixed(2);
         li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
         lista.appendChild(li);
     });
 
-    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
-    mostrarTotalEnCobrar();
-
+    mostrarTotalEnCobrar(pedidoGuardado);
 }
 
-function mostrarTotalEnCobrar() {
-    const pedidoGuardado = localStorage.getItem('pedido');
-    const totalSpan = document.getElementById('total');
+function mostrarTotalEnCobrar(pedido) {
+    const totalSpan = document.getElementById('totalCobro');
     let total = 0;
 
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
+    if (pedido && Array.isArray(pedido)) {
         total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
     }
 
     totalSpan.textContent = total.toFixed(2);
 }
 
+async function cancelarPago() {
+    let message = "¿Estás seguro de cancelar la operación?";
+    if (await AlertConfirm(message)) {
+        const mesaId = localStorage.getItem('mesaSeleccionada');
+        localStorage.removeItem(`pedido_mesa_${mesaId}`);
 
-   async function cancelarPago() {
-    let message = '¿Aceptas anular la operación?';
-    if ( await AlertConfirm(message)) {
-        localStorage.removeItem('pedido'); 
         window.location.href = './menu.html';
     } else {
-        message = 'Operacion cancelada';
+        AlertMessage("Operación cancelada");
+    }
+}
+
+async function PagoTarjeta() {
+    let message = "La operación se ha realizado con éxito";
+    let redirection = 'factura.html';
+    AlertMessage(message, redirection);
+}
+
+async function PagoEfectivo(pedido) {
+    if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
+        AlertMessage("No hay productos cargados para cobrar.");
+        return;
+    }
+
+    let total = pedido.reduce((sum, item) => {
+        const precio = Number(item.precio) || 0;
+        const cantidad = Number(item.cantidad) || 0;
+        return sum + precio * cantidad;
+    }, 0);
+
+    let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
+    if (isNaN(recibido)) {
+        AlertMessage("Por favor, ingrese una cantidad válida.");
+        return;
+    }
+
+    // Redondeo para evitar problemas de decimales
+    let cambio = Math.round((recibido - total) * 100) / 100;
+
+    let message = "";
+    let redirection = "";
+
+    if (cambio === 0) {
+        message = 'Pago realizado con éxito. Importe Exacto';
+        redirection = 'factura.html';
+
+
+        AlertMessage(message, redirection);
+    } else if (cambio > 0) {
+        message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
+        redirection = 'factura.html';
+
+
+        AlertMessage(message, redirection);
+    } else {
+        message = 'El importe recibido es insuficiente.';
         AlertMessage(message);
     }
 }
 
-function PagoTarjeta() {
-    let message = 'La operación se ha realizado con éxito';
-    let redirection = '../../Salas_/sala1.html';
-    AlertMessage(message,redirection);
-    //al llegar a salas el localStorage se borra automaticamente
-    // const mesaId = localStorage.getItem('mesaSeleccionada');
-    // localStorage.removeItem(`pedido_mesa_${mesaId}`);
-    // window.location.href = 'salas1.html';
-}
 
-function PagoEfectivo() {
-    const pedidoGuardado = localStorage.getItem("pedido");
-    let total = 0;
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    }
-    let recibido = parseFloat(prompt('Ingrese la cantidad recibida:'));
-    if (isNaN(recibido)) {
-        alert('Por favor, ingrese una cantidad válida.');
-        return;
-    }
-    let cambio = recibido - total;
-
-    if (cambio === 0) {
-        let message = 'Importe Exacto';
-        let redirection = '../../Salas_/sala1.html';
-        //al llegar a salas se borra todo automaticamente
-        // const mesaId = localStorage.getItem('mesaSeleccionada');
-        // localStorage.removeItem(`pedido_mesa_${mesaId}');
-
-        AlertMessage(message,redirection);
-        
-        window.location.href = 'salas1.html';
-    } else if (cambio > 0) {
-        let message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
-        let redirection = '../../Salas_/sala1.html';
-        
-        //al llegar a salas se borra todo automaticamente
-        // const mesaId = localStorage.getItem('mesaSeleccionada');
-        // localStorage.removeItem(`pedido_mesa_${mesaId}`);
-        // window.location.href = 'salas1.html';
-
-        AlertMessage(message,redirection);
-    }
-}
