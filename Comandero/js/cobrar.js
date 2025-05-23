@@ -97,8 +97,7 @@ async function cancelarPago() {
 
 async function PagoTarjeta() {
     let message = "La operación se ha realizado con éxito";
-    let redirection = "../../Salas_/sala1.html";
-
+    let redirection = 'factura.html';
     AlertMessage(message, redirection);
 }
 

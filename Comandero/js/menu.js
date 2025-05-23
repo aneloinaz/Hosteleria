@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('[ENVIAR] pedido:', pedido);
 
             // 1. Obtener comandas abiertas
-            await new Promise(resolve => setTimeout(resolve, 500));
+           
             const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
             console.log('[ENVIAR] comandasAbiertas:', comandasAbiertas);
 
@@ -106,16 +106,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 // No hay comanda abierta, crea una nueva
                 console.log('[ENVIAR] No hay comanda abierta, creando nueva...');
-                const nuevaComanda = await crearComanda(mesaId);
-                console.log('[ENVIAR] nuevaComanda:', nuevaComanda);
+                await crearComanda(mesaId);
+                document.getElementById("boton-esperar").textContent = "Cargando...";
+                await new Promise(resolve =>setTimeout(resolve, 500));
+                
+                const comandasAbiertas = await obtenerComandasAbiertas(mesaId);
+                console.log('[ENVIAR] comandasAbiertas:', comandasAbiertas);
+
+                let lista = Array.isArray(comandasAbiertas.comandas)
+                ? comandasAbiertas.comandas
+                : [];
+                // Ya hay comanda abierta, usa la última
+                const comandaReciente = lista[lista.length - 1];
+                console.log('[ENVIAR] comandaReciente:', comandaReciente);
                 idComanda =
-                    nuevaComanda.idComanda ||
-                    nuevaComanda.Idcomanda ||
-                    nuevaComanda.id ||
-                    nuevaComanda.comandaId ||
+                    comandaReciente.idComanda ||
+                    comandaReciente.Idcomanda ||
+                    comandaReciente.id ||
+                    comandaReciente.comandaId ||
                     null;
             }
-
+            document.getElementById("boton-esperar").textContent = "Enviar";
             console.log('[ENVIAR] idComanda final:', idComanda);
 
             if (!idComanda) {
@@ -126,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('idComanda', idComanda);
 
             // --- Obtener productos ya enviados ---
+
             let productosEnviados = [];
             for (const comanda of lista) {
                 const idCom = comanda.idComanda;
@@ -192,6 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 AlertMessage(message);
                 return;
             }
+
                 message = 'Comanda enviada correctamente';
                 redirection = '../../Salas_/sala1.html';
                 AlertMessage(message, redirection);
