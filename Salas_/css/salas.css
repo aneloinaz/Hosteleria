@@ -27,9 +27,6 @@ header{
 h1{
   color: #ffffff;
   font-size: 3rem;
-  width: 15rem;
-  height: 10rem;
-  padding: 2rem;
 }
 .mesa:hover {
   background-color: #444645;
@@ -86,7 +83,7 @@ aside{
 }
 
 .btnRes{
-   background-color: #6EE7B7;
+  background-color: #6EE7B7;
   color: hsl(215, 28%, 17%);
   padding: 6px 14px;
   border-radius: 20px;
@@ -97,7 +94,9 @@ aside{
   display: flex;
   justify-content: center;
   align-items: center;
-
+}
+.btnRes:hover{
+  background-color: #fff;
 }
 
 

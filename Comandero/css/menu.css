@@ -122,7 +122,7 @@
     gap: 20px;
     cursor: pointer;
     user-select: none;
-    padding: 2rem;
+    padding: 3rem 1rem;
   }
   
   .productos p {
@@ -283,9 +283,12 @@
     padding: 20px;
     border-radius: 15px;
     min-width: 220px;
+    min-height: 7rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow-y: scroll;
+    margin-top:2rem;
   }
   
   .Resumenpedido h2 {
@@ -322,17 +325,13 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 10px;
     font-weight: bold;
-    margin: 10px 0;
     border-radius: 5px;
+    margin-top:2rem;
   }
   
   .pagos h2 {
-    margin-bottom: 20px;
     font-size: 1.7rem;
-    padding-bottom: 15px;
-    margin-right: 30px 0px;
   }
   
   .pagos button {
@@ -350,7 +349,15 @@
     margin-left: 80px;
   
   }
-  
+  #boton-cancelar:hover, .pagos button:hover{
+      background-color: #e7e7e7;
+    }
+  #boton-cancelar{
+    background-color: red;
+    color:#fff;
+  }
+   
+ 
   
   
   
@@ -489,7 +496,6 @@
       min-height: 0;
       height: 5rem;
     }
-  
     .subCategoria {
       padding: 0;
       position: relative;
