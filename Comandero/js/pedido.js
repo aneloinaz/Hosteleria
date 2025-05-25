@@ -1,28 +1,66 @@
+import { AlertMessage } from "../../components/AlertComponents.js";
 import { pintarPedidoUlConEstado } from "./menu.js";
 
 // Asegura que solo se añada una vez el listener al evento DOMContentLoaded
 if (!window.domReadyListenerAdded) {
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM completamente cargado");
-  });
-  window.domReadyListenerAdded = true;
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("DOM completamente cargado");
+    });
+    window.domReadyListenerAdded = true;
 }
-
 document.addEventListener('DOMContentLoaded', async function () {
     console.log("Cargado el DOM en pedido.js");
 
-    // Recuperar datos del local storage al cargar la página
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) return;
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        pedido.forEach(item => {
-            const precio = parseFloat(item.precio);
-            agregarProductoAlPedido(item.nombre, isNaN(precio) ? 0 : precio, item.cantidad, item.id, item.numOrden, item.estado);
+
+    const btnCobrar = document.getElementsByClassName("cobrar-btn")[0];
+    const btnSubtotal = document.getElementsByClassName("subtotal-btn")[0];
+
+    // Limpieza preventiva
+    const pedidoGuardadoInicial = localStorage.getItem(`pedido_mesa_${mesaId}`);
+    const productosIniciales = pedidoGuardadoInicial ? JSON.parse(pedidoGuardadoInicial) : [];
+    if (!hayProductosPendientesValidos(productosIniciales)) {
+        localStorage.removeItem(`pedido_mesa_${mesaId}`);
+    }
+
+    if (btnCobrar) {
+        btnCobrar.addEventListener('click', () => {
+            const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+            const productosPendientes = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+
+            if (hayProductosPendientesValidos(productosPendientes)) {
+                AlertMessage("Elimina o envía los productos pendientes.");
+            } else {
+                window.location.href = "cobrar.html";
+            }
+        });
+    }
+
+    if (btnSubtotal) {
+        btnSubtotal.addEventListener('click', () => {
+            const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
+            const productosPendientes = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+
+            if (hayProductosPendientesValidos(productosPendientes)) {
+                AlertMessage("Elimina o envía los productos pendientes.");
+            } else {
+                window.location.href = "subtotal.html";
+            }
         });
     }
 });
+
+function hayProductosPendientesValidos(pedido) {
+    if (!Array.isArray(pedido)) return false;
+
+    return pedido.some(p => {
+        const cantidad = Number(p.cantidad);
+        const id = Number(p.id);
+        return !isNaN(cantidad) && cantidad > 0 && !isNaN(id) && id > 0;
+    });
+}
+
 
 export function handlerProductos() {
     document.querySelectorAll('.productos').forEach(productoEl => {
@@ -31,14 +69,14 @@ export function handlerProductos() {
             const nombre = productoEl.querySelector('p').textContent;
             const precio = parseFloat(productoEl.dataset.precio); // Siempre float
             const numOrden = productoEl.dataset.numorden || 1;
-            agregarProductoAlPedido(nombre, precio, 1, id, numOrden,false);
+            agregarProductoAlPedido(nombre, precio, 1, id, numOrden, false);
         });
     });
 }
 
 export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrden, estado = false) {
     precio = parseFloat(precio);
-    console.log("aqui estoy: "+nombre+""+id);
+    console.log("aqui estoy: " + nombre + "" + id);
     // Validación del precio y la cantidad
     if (isNaN(precio) || precio <= 0 || cantidad <= 0) {
         console.warn(`Producto inválido no agregado: ${nombre}, Precio: ${precio}, Cantidad: ${cantidad}`);
@@ -61,7 +99,7 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
         guardarPedidoEnLocalStorage(); // Guardamos el pedido con la nueva cantidad
         return;
     }
-    console.log("aqui estoy en crear producto: "+nombre+""+id);
+    console.log("aqui estoy en crear producto: " + nombre + "" + id);
     // Si el producto no existe, lo agregamos como un nuevo producto
     const li = document.createElement('li');
     li.dataset.id = id;
@@ -112,7 +150,7 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
     });
 
     pedidoLista.appendChild(li);
-     console.log("aqui estoy en casi al  final: "+nombre+""+id);
+    console.log("aqui estoy en casi al  final: " + nombre + "" + id);
     actualizarTotal();
     //se podria enviar
     guardarPedidoEnLocalStorage();
@@ -141,10 +179,10 @@ function guardarPedidoEnLocalStorage() {
     if (!mesaId) return;
 
     const pedidoLista = document.querySelectorAll('.pedido>ul>li');
-    
+
     // Crear una lista con todos los productos
     const pedido = Array.from(pedidoLista).map(li => {
-        return {  
+        return {
             id: li.dataset.id,
             nombre: li.dataset.nombre,
             precio: parseFloat(li.dataset.precioUnitario) || 0, // Siempre float y nunca NaN

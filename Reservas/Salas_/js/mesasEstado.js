@@ -1,4 +1,4 @@
-import { AlertConfirm } from "/components/AlertComponents";
+import { AlertConfirm } from "/components/AlertComponents.js";
 
 export async function actualizarEstado(){
       //const fecha = new Date().toISOString().slice(0,10);
@@ -6,7 +6,6 @@ export async function actualizarEstado(){
   const mesas = document.getElementsByClassName("mesa");
 
     const estados = await cargarEstadosDesdeJSON(fecha);
-    actualizarContador(fecha);
 
     Array.from(mesas).forEach(mesa => {
         const ID = parseInt(mesa.dataset.id);

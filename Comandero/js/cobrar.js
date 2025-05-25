@@ -5,8 +5,19 @@ import { AlertConfirm } from "../../components/AlertComponents.js";
 let pedidoActual = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById("boton-tarjeta").addEventListener('click', PagoTarjeta);
-    document.getElementById("boton-efectivo").addEventListener('click', () => PagoEfectivo(pedidoActual));
+    //document.getElementById("boton-tarjeta").addEventListener('click',  PagoTarjeta);
+    //document.getElementById("boton-efectivo").addEventListener('click', () => PagoEfectivo(pedidoActual));
+    document.getElementById("boton-tarjeta").addEventListener('click', () => {
+    localStorage.setItem("formaPago", "Pago con Tarjeta");
+    PagoTarjeta();  // Llamada a la función
+    AlertMessage("La operación se ha realizado con éxito", "factura.html");
+});
+
+document.getElementById("boton-efectivo").addEventListener('click', () => {
+    localStorage.setItem("formaPago", "Pago en Efectivo");
+    PagoEfectivo(pedidoActual);  // Llamada a la función con pedidoActual
+    AlertMessage("La operación se ha realizado con éxito", "factura.html");
+});
     document.getElementById("boton-cancelar").addEventListener('click', async () => { cancelarPago() });
 
     mostrarPedidoEnCobrar();
@@ -96,12 +107,14 @@ async function cancelarPago() {
 }
 
 async function PagoTarjeta() {
+    
     let message = "La operación se ha realizado con éxito";
     let redirection = 'factura.html';
     AlertMessage(message, redirection);
 }
 
 async function PagoEfectivo(pedido) {
+
     if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
         AlertMessage("No hay productos cargados para cobrar.");
         return;
@@ -126,12 +139,14 @@ async function PagoEfectivo(pedido) {
     let redirection = "";
 
     if (cambio === 0) {
+        localStorage.setItem("formaPago","Pago en efectivo");
         message = 'Pago realizado con éxito. Importe Exacto';
         redirection = 'factura.html';
 
 
         AlertMessage(message, redirection);
     } else if (cambio > 0) {
+        localStorage.setItem("formaPago","Pago en efectivo");
         message = `Pago realizado con éxito. Su cambio es: €${cambio.toFixed(2)}`;
         redirection = 'factura.html';
 

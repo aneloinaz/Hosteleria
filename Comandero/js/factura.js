@@ -88,9 +88,9 @@ function mostrarFechaYHora() {
 }
 
 function mostrarInfoExtra() {
-    const salaMesa = localStorage.getItem('salaMesa') || 'Sala 1 - Mesa 1';
+    const salaMesa = localStorage.getItem('mesaSeleccionada') || '';
     const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
-    document.getElementById('sala-mesa').textContent = salaMesa;
+    document.getElementById('sala-mesa').textContent = "Mesa: "+salaMesa;
     document.getElementById('forma-pago').textContent = formaPago;
 }
 

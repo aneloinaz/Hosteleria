@@ -1,16 +1,16 @@
-import { handlerProductos } from "./pedido.js";
+import { agregarProductoAlPedido, handlerProductos } from "./pedido.js";
 import { AlertMessage } from "../../components/AlertComponents.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     let message = '';
     let redirection = '';
     // meter manualmente la mesa
-    const mesa = 1;
-    const comensales = 4;
+    
+    const mesa = localStorage.getItem("mesaSeleccionada");
     const hora = new Date().toLocaleTimeString();
     const fecha = new Date().toLocaleDateString();
     // Guardar datos de la mesa en el local storage
-    localStorage.setItem('datosMesa', JSON.stringify({ mesa, comensales, hora, fecha }));
+    localStorage.setItem('datosMesa', JSON.stringify({ mesa, hora, fecha }));
 
 
 
@@ -464,12 +464,11 @@ export async function pintarPedidoUlConEstado() {
         if (idsEnviados.includes(id)) return;
         if (!id || isNaN(cantidad) || isNaN(precio) || cantidad <= 0) return;
 
-        const li = document.createElement('li');
-        li.textContent = `${prod.nombre} x${cantidad} - ${(precio * cantidad).toFixed(2)}€`;
-        li.classList.add('producto-noenviado');
-        lista.appendChild(li);
+        
+        agregarProductoAlPedido(prod.nombre,prod.precio,prod.cantidad,prod.id,1,false)
         totalPendientes += cantidad * precio;
     });
+    
 
     // 6. Mostrar total de toda la comanda (enviados + pendientes)
     const totalComanda = totalEnviados + totalPendientes;
