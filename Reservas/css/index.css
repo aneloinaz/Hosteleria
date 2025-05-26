@@ -64,3 +64,14 @@ body {
     
 
   }
+
+    .volver {
+    background: #cc8238;
+    color: white;
+    padding: 12px 20px;  
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    margin-top: 20px;
+    cursor: pointer;
+  }

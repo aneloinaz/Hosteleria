@@ -58,7 +58,7 @@ function DatosUsuario(){
     // alert(data.mensaje || numMesa);
     alert("Reserva Exitosa");
     localStorage.clear();
-    window.location.href = "/Reservas/html/index.html";
+    window.location.href = "/Salas_/sala1.html";
   })
   .catch(error => {
     console.error("Error al enviar reserva:", error);
