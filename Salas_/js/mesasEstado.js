@@ -1,17 +1,17 @@
 export async function actualizarEstado(){
-      const fecha = new Date().toISOString().slice(0,10);
-  const mesas = document.getElementsByClassName("mesa");
+      //const fecha = new Date().toISOString().slice(0,10);
+      const fecha=localStorage.getItem("fecha");
+      const mesas = document.getElementsByClassName("mesa");
+     const estados = await cargarEstadosDesdeJSON(fecha);
+      actualizarContador(fecha);
 
-    const estados = await cargarEstadosDesdeJSON(fecha);
-    actualizarContador(fecha);
-
-    Array.from(mesas).forEach(mesa => {
+      Array.from(mesas).forEach(mesa => {
         const ID = parseInt(mesa.dataset.id);
         const mesaEstado = estados.estados.find(m => m.idMesa === ID);
         if (mesaEstado) {
             cambiarColorMesa(mesa, mesaEstado.estado);
         }
-    });
+     });
 }
 
  async function cargarEstadosDesdeJSON(fecha) {
@@ -28,31 +28,27 @@ export async function actualizarEstado(){
 function cambiarColorMesa(mesaElemento, estado) {
    if (estado==0) {
      mesaElemento.style.backgroundColor = "green"; // Libre
-
-   } else if (estado==1) {
+     mesaElemento.addEventListener('click', function() {
+                const idMesa = this.getAttribute('data-id'); 
+                localStorage.setItem('mesaSeleccionada', idMesa);
+                window.location.href = '/Reservas/html/iconfirmacion.html'});
+   } else if (estado==1 || estado==2 || estado==3) {
      mesaElemento.style.backgroundColor = "red"; // Reservado
-     mesaElemento.addEventListener('click', function() {
+     /*mesaElemento.addEventListener('click', function() {
                 const idMesa = this.getAttribute('data-id'); 
                 localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   } else if (estado==2) {
-     mesaElemento.style.backgroundColor = "orange"; // Comanda pedida
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   } else if (estado==3) {
-     mesaElemento.style.backgroundColor = "blue"; // Finalizado
-}
+                 window.location.href = '/Reservas/html/iconfirmacion.html'});*/
+   };
 }
 
 async function actualizarContador(fecha){
   const data = await getComensalesMesa(fecha);
   let comensales = 0;
   data.mesas.forEach(mesa =>{
-    comensales += mesa.numComensales;
-    console.log("Num Mesa: "+mesa.numMesa + "-- comensales: " + mesa.numComensales);
+    comensales=+ mesa.numComensales;
+    console.log("Num Mesa: "+mesa.numMesa + "comensales: " + mesa.numComensales);
   });
+  
   document.getElementById("contador").textContent = comensales;
 }
 
