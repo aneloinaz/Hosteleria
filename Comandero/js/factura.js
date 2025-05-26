@@ -167,9 +167,7 @@ async function cerrarComandasYEliminarReserva(mesaId) {
 
             if (!resDelete.ok) {
                 console.warn(`Error al eliminar reserva ${reservaMesa.idReserva}`);
-            } else {
-                console.log(`Reserva ${reservaMesa.idReserva} eliminada`);
-            }
+            } 
         }
 
     } catch (error) {

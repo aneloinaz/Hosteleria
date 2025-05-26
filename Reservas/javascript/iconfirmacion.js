@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded",()=>{
    const fecha = localStorage.getItem("fecha");
     const numComensales = localStorage.getItem("personas");
@@ -56,13 +55,13 @@ function DatosUsuario(){
   })
   .then(response => response.json())
   .then(data => {
-    alert(data.mensaje || numMesa);
+    // alert(data.mensaje || numMesa);
+    alert("Reserva Exitosa");
     localStorage.clear();
     window.location.href = "/Reservas/html/index.html";
   })
   .catch(error => {
     console.error("Error al enviar reserva:", error);
-    alert("Ocurrió un error al procesar la reserva.");
+    alert("Error al Reservar");
   });
-
 }

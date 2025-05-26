@@ -4,12 +4,12 @@ import { pintarPedidoUlConEstado } from "./menu.js";
 // Asegura que solo se añada una vez el listener al evento DOMContentLoaded
 if (!window.domReadyListenerAdded) {
     document.addEventListener("DOMContentLoaded", () => {
-        console.log("DOM completamente cargado");
+
     });
     window.domReadyListenerAdded = true;
 }
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log("Cargado el DOM en pedido.js");
+
 
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) return;
@@ -76,11 +76,11 @@ export function handlerProductos() {
 
 export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrden, estado = false) {
     precio = parseFloat(precio);
-    console.log("aqui estoy: " + nombre + "" + id);
+
     // Validación del precio y la cantidad
     if (isNaN(precio) || precio <= 0 || cantidad <= 0) {
         console.warn(`Producto inválido no agregado: ${nombre}, Precio: ${precio}, Cantidad: ${cantidad}`);
-        console.log("aqui estoy");
+
         return; // No agregar el producto si el precio o la cantidad son inválidos
     }
 
@@ -99,7 +99,7 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
         guardarPedidoEnLocalStorage(); // Guardamos el pedido con la nueva cantidad
         return;
     }
-    console.log("aqui estoy en crear producto: " + nombre + "" + id);
+
     // Si el producto no existe, lo agregamos como un nuevo producto
     const li = document.createElement('li');
     li.dataset.id = id;
@@ -150,7 +150,7 @@ export function agregarProductoAlPedido(nombre, precio, cantidad = 1, id, numOrd
     });
 
     pedidoLista.appendChild(li);
-    console.log("aqui estoy en casi al  final: " + nombre + "" + id);
+
     actualizarTotal();
     //se podria enviar
     guardarPedidoEnLocalStorage();
@@ -191,7 +191,7 @@ function guardarPedidoEnLocalStorage() {
             estado: li.dataset.estado // Asegúrate de guardar el estado también (si fue enviado o no)
         };
     });
-    console.log(pedido);
+
     // Guardar el pedido completo con las cantidades actualizadas
     localStorage.setItem(`pedido_mesa_${mesaId}`, JSON.stringify(pedido));
 }
