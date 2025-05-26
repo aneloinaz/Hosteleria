@@ -61,7 +61,7 @@ function mostrarTotalEnCobrar(pedido) {
 
     calcularBase(total);
     calcularCuota(total);
-    calcularMediaxComensal(total);
+    // calcularMediaxComensal(total);
 }
 
 function calcularBase(total) {
@@ -74,12 +74,12 @@ function calcularCuota(total) {
     document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
 }
 
-function calcularMediaxComensal(total) {
-    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
-    document.getElementById('comensales').textContent = numComensales;
-    const media = total / numComensales;
-    document.getElementById('mediaxComensal').textContent = media.toFixed(2);
-}
+// function calcularMediaxComensal(total) {
+//     const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
+//     document.getElementById('comensales').textContent = numComensales;
+//     const media = total / numComensales;
+//     document.getElementById('mediaxComensal').textContent = media.toFixed(2);
+// }
 
 function mostrarFechaYHora() {
     const ahora = new Date();
