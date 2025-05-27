@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("ListadoReservas");
   const fechaInput = document.getElementById("fechaInput");
-   //const hoy = new Date().toISOString().split("T")[0];
-  //fechaInput.value = hoy;
-  //cargarReservas(hoy);
- // const buscarBtn = document.getElementById("buscarBtn");
+   const fecha = new Date().toISOString().split("T")[0];
+  fechaInput.value = fecha;
+  cargarReservas(fecha);
 
   // Función para cargar reservas para una fecha
   function cargarReservas(fecha) {
@@ -26,8 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         datos.reservas.forEach(reserva => {
           const fila = document.createElement("tr");
           fila.innerHTML = `
-           <td>${reserva.idReserva}</td> 
-          <td>${reserva.numMesa}</td>
+            <td>${reserva.numMesa}</td>
             <td>${reserva.nombreCliente}</td>
             <td>${reserva.apellidoCliente}</td>
             <td>${reserva.telefonoCliente}</td>
@@ -44,19 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
         tablaBody.innerHTML = "<tr><td colspan='8'>Error al cargar reservas</td></tr>";
       });
   }
-
-  // Evento botón buscar
-  buscarBtn.addEventListener("click", () => {
-    const fechaSeleccionada = fechaInput.value;
-    if (!fechaSeleccionada) {
-      alert("Selecciona una fecha primero");
-      return;
-    }
-    cargarReservas(fechaSeleccionada);
-  });
-
-  // (Opcional) cargar reservas de hoy al inicio
- 
+   fechaInput.addEventListener("change", () => {
+      const fecha = fechaInput.value;
+      if (!fecha) return;
+      cargarReservas(fecha);
+    });
 });
 document.addEventListener("DOMContentLoaded", () => {
   const agregarBtn = document.getElementById("agregarBtn");
@@ -71,7 +61,7 @@ function eliminarReserva(idreserva){
     console.log(idreserva);
      if (!confirm(`¿Seguro que deseas eliminar la reserva?`)) return;
 
-    fetch(`https://apiostalaritza.lhusurbil.eus/DeleteReserva?idreserva=${encodeURIComponent(idreserva)}`, {
+        fetch(`https://apiostalaritza.lhusurbil.eus/DeleteReserva?idreserva=${encodeURIComponent(idreserva)}`, {
       method: "DELETE", 
       headers: {
         "Content-Type": "application/json"
@@ -83,15 +73,17 @@ function eliminarReserva(idreserva){
     .then(response => response.json())
     .then(data => {
       
-        if (!data.ok) throw new Error("Error al eliminar la reserva");
+        if (!data.ok) 
+          throw new Error("Error al eliminar la reserva");
+          
         // Recargar reservas para la fecha actual
         else
-            cargarReservas(fechaInput);
+            window.location.href="/Reservas/html/ListadoReservas.html";
       })
-      /*.catch(error => {
+      .catch(error => {
         console.error("Error al eliminar:", error);
-        alert("No se pudo eliminar la reserva ssSS");
-      });*/
+       
+      })
   }
 
 
