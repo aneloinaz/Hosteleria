@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         redirection = "../../Salas_/sala1.html";
         AlertMessage(message,redirection);
     }
-
+ 
     const categoriasJson = await fetchCategorias();
 
     if (categoriasJson.categorias.length > 0) {
