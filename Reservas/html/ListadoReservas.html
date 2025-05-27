@@ -5,55 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reservas - LHUSURBIL</title>
   <link rel="stylesheet" href="/Reservas/css/ListadoReservas.css">
-  
   <script src="/Reservas/javascript/ListadoReservas1.js"></script>
 </head>
 <body>
   <h1>Reservas</h1>
   <div id="reservasBtn">
+    <button type="button"  class="continuar"><a href="/Salas_/sala1.html">Volver</a></button><br>
+
+
     <label for="fechaInput">Selecciona un día:</label>
     <input type="date" id="fechaInput" />
-    <button id="buscarBtn">Buscar Reservas</button>
     <button id="agregarBtn">Añadir Reservas</button>
+   
   </div>
-  
+ 
+
 
   <table>
     <thead>
       <tr>
-        <th>idReserva</th>
+        <!--<th>idReserva</th>-->
         <th>mesa</th>
         <!--<th>Hora</th>-->
         <th>Nombre</th>
-        <th>apellido</th>
+        <th>apellido</th><br>
         <th>telefono</th>
         <th>Comensales</th>
-        <th>Observaciones</th>
+        <th>Notas</th>
         <th>Eliminar</th>
        
-        
+       
       </tr>
     </thead>
     <tbody id="ListadoReservas">
-      
+     
     </tbody>
   </table>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-   <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <a href="./indexsalas.html"><button class="volver"> Volver</button></a>
 </body>
 </html>
