@@ -1,95 +1,176 @@
-function imprimirTicket() {
-    const ticket = document.getElementById('ticket');
-    const ventanaImpresion = window.open('', '', 'width=600,height=400');
-    ventanaImpresion.document.write('<html ><head><title>Ticket de compra</title></head><body>');
-    ventanaImpresion.document.write(ticket.innerHTML);
-    ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
-    ventanaImpresion.document.close();
-    ventanaImpresion.print();
-    ventanaImpresion.close();
-    alert('El ticket se ha impreso correctamente');
-}
+import { AlertMessage } from "../../components/AlertComponents.js";
 
-/*const metodoPago = prompt("¿Pago con tarjeta o efectivo? (Escribe 'tarjeta' o 'efectivo')").toLowerCase();
-let mensajePago = '';
-if (metodoPago === 'tarjeta') {
-    PagoTarjeta();
-    mensajePago = 'Pago realizado con tarjeta';
-} else if (metodoPago === 'efectivo') {
-    alert('Pago realizado en efectivo');
-    mensajePago = 'Pago realizado en efectivo';
-} else {
-    alert('Método de pago no válido');
-    mensajePago = 'Método de pago no válido';
-}
-document.getElementById('total').textContent = calcularTotal();
-const metodoPagoDiv = document.createElement('div');
-metodoPagoDiv.textContent = mensajePago;
-document.getElementById('ticket').appendChild(metodoPagoDiv);*/
+let pedidoActual = [];
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarPedidoDesdeAPI();
+    mostrarFechaYHora();
+    mostrarInfoExtra();
+    document.getElementById("boton-imprimir").addEventListener("click", imprimirTicket);
+    document.getElementById("boton-finalizar").addEventListener("click", finalizarSinImprimir);
+});
+
+async function mostrarPedidoDesdeAPI() {
+    const lista = document.getElementById('listaCobro');
+    lista.innerHTML = '';
+
     const mesaId = localStorage.getItem('mesaSeleccionada');
-    if (!mesaId) return;
+    if (!mesaId) {
+        lista.innerHTML = '<li>No hay mesa seleccionada.</li>';
+        return;
+    }
 
-    // Obtener productos de la comanda (enviados)
-    let productosEnviados = [];
+    // Obtener productos desde API
+    let pedido = [];
     const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
     const dataComandas = await resComandas.json();
     const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
     for (const comanda of comandas) {
         const idComanda = comanda.idComanda;
         if (!idComanda) continue;
         const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
         const detalleData = await detalleRes.json();
         if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
-            productosEnviados = productosEnviados.concat(detalleData.detalleComandas.map(d => d.idProducto));
+            pedido = pedido.concat(detalleData.detalleComandas);
         }
     }
 
-    // Agrupa productos enviados por idProducto
-    const enviadosAgrupados = {};
-    productosEnviados.forEach(prod => {
-        if (!enviadosAgrupados[prod.idProducto]) {
-            enviadosAgrupados[prod.idProducto] = {
-                nombre: prod.nombre,
-                cantidad: Number(prod.cantidad) || 0,
-                precio: Number(prod.precio) || 0
-            };
-        } else {
-            enviadosAgrupados[prod.idProducto].cantidad += Number(prod.cantidad) || 0;
+    if (pedido.length === 0) {
+        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
+        return;
+    }
+
+    pedidoActual = pedido;
+
+    pedido.forEach(item => {
+        const li = document.createElement('li');
+        const subtotal = (item.precio * item.cantidad).toFixed(2);
+        li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
+        lista.appendChild(li);
+    });
+
+    mostrarTotalEnCobrar(pedido);
+    generarQR();
+}
+
+function mostrarTotalEnCobrar(pedido) {
+    const totalSpan = document.getElementById('total');
+    const total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+    totalSpan.textContent = total.toFixed(2);
+
+    calcularBase(total);
+    calcularCuota(total);
+    // calcularMediaxComensal(total);
+}
+
+function calcularBase(total) {
+    const base = total / 1.10;
+    document.getElementById('base-iva').textContent = base.toFixed(2);
+}
+
+function calcularCuota(total) {
+    const cuota = total * 0.10;
+    document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
+}
+
+// function calcularMediaxComensal(total) {
+//     const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
+//     document.getElementById('comensales').textContent = numComensales;
+//     const media = total / numComensales;
+//     document.getElementById('mediaxComensal').textContent = media.toFixed(2);
+// }
+
+function mostrarFechaYHora() {
+    const ahora = new Date();
+    const formato = ahora.toLocaleString('es-ES');
+    document.getElementById('fecha-hora').textContent = formato;
+}
+
+function mostrarInfoExtra() {
+    const salaMesa = localStorage.getItem('mesaSeleccionada') || '';
+    const formaPago = localStorage.getItem('formaPago') || 'Pago en efectivo';
+    document.getElementById('sala-mesa').textContent = "Mesa: "+salaMesa;
+    document.getElementById('forma-pago').textContent = formaPago;
+}
+
+function generarQR() {
+    const total = document.getElementById('total').textContent;
+    const textoQR = `Total factura: ${total} €`;
+    const urlQR = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(textoQR)}&size=150x150`;
+
+    const contenedorQR = document.getElementById('contenedorQR');
+    contenedorQR.innerHTML = '';
+    const imgQR = document.createElement('img');
+    imgQR.src = urlQR;
+    imgQR.alt = 'Código QR del total';
+    contenedorQR.appendChild(imgQR);
+}
+
+async function imprimirTicket() {
+    const ticket = document.getElementById('ticket');
+    const ventanaImpresion = window.open('', '', 'width=600,height=400');
+    ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
+    ventanaImpresion.document.write(ticket.innerHTML);
+    ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
+    ventanaImpresion.document.close();
+    ventanaImpresion.print();
+    ventanaImpresion.close();
+
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (mesaId) {
+        await cerrarComandasYEliminarReserva(mesaId);
+    }
+
+    AlertMessage('El ticket se ha impreso correctamente', '../../Salas_/sala1.html');
+}
+
+async function finalizarSinImprimir() {
+    const mesaId = localStorage.getItem('mesaSeleccionada');
+    if (mesaId) {
+        await cerrarComandasYEliminarReserva(mesaId);
+    }
+    AlertMessage('Operación finalizada sin imprimir', '../../Salas_/sala1.html');
+}
+
+async function cerrarComandasYEliminarReserva(mesaId) {
+    try {
+        // 1. CERRAR TODAS LAS COMANDAS DE ESA MESA
+        const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+        const dataComandas = await resComandas.json();
+        const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+        for (const comanda of comandas) {
+            const idComanda = comanda.idComanda;
+            if (!idComanda) continue;
+
+            const res = await fetch(`https://apiostalaritza.lhusurbil.eus/PutCerrarComanda?idComanda=${idComanda}`, {
+                method: 'PUT'
+            });
+
+            if (!res.ok) {
+                console.warn(`No se pudo cerrar la comanda ${idComanda}`);
+            }
         }
-    });
 
-    // Productos del pedido local (no enviados)
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    const pedido = pedidoGuardado ? JSON.parse(pedidoGuardado) : [];
+        // 2. ELIMINAR LA RESERVA DE ESA MESA (si existe) PARA HOY
+        const hoy = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+        const resReservas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetReservasDia?fecha=${hoy}`);
+        const dataReservas = await resReservas.json();
+        const reservas = Array.isArray(dataReservas.reservas) ? dataReservas.reservas : [];
 
-    // Mostrar productos en el ticket
-    const section = document.querySelector('#ticket .section');
-    let total = 0;
+        const reservaMesa = reservas.find(r => r.numMesa == mesaId);
+        if (reservaMesa && reservaMesa.idReserva) {
+            const resDelete = await fetch(`https://apiostalaritza.lhusurbil.eus/DeleteReserva?idreserva=${reservaMesa.idReserva}`, {
+                method: 'DELETE'
+            });
 
-    // Productos enviados
-    Object.values(enviadosAgrupados).forEach(prod => {
-        const cantidad = Number(prod.cantidad) || 0;
-        const precio = Number(prod.precio) || 0;
-        const subtotal = cantidad * precio;
-        const div = document.createElement('div');
-        div.textContent = `${prod.nombre} x${cantidad} - ${subtotal.toFixed(2)}€`;
-        section.appendChild(div);
-        total += subtotal;
-    });
+            if (!resDelete.ok) {
+                console.warn(`Error al eliminar reserva ${reservaMesa.idReserva}`);
+            } 
+        }
 
-    // Productos pendientes
-    pedido.forEach(producto => {
-        const cantidad = Number(producto.cantidad) || 0;
-        const precio = Number(producto.precio) || 0;
-        const subtotal = cantidad * precio;
-        const div = document.createElement('div');
-        div.textContent = `${producto.nombre} x${cantidad} - ${subtotal.toFixed(2)}€`;
-        section.appendChild(div);
-        total += subtotal;
-    });
-
-    // Mostrar total
-    document.getElementById('total').textContent = `${total.toFixed(2)}€`;
-});
+    } catch (error) {
+        console.error("Error cerrando comandas y/o eliminando reserva:", error);
+    }
+}

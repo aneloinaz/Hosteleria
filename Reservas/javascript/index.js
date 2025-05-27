@@ -1,3 +1,5 @@
+import { AlertMessage } from "../../components/AlertComponents.js";
+
 document.querySelector("#FechaReserva").addEventListener("submit", function(event) {
     event.preventDefault();
     const numComensales = document.getElementById("personas").value;
@@ -15,13 +17,15 @@ document.querySelector("#FechaReserva").addEventListener("submit", function(even
     .then(response => response.json())
     .then(data => {
       if (data.mesas.length!=0) {
-        alert(`✅ Hay disponibilidad para ${personas} personas ${fecha}.`);
+        //alert(`✅ Hay disponibilidad para ${personas} personas ${fecha}.`);
         const numMesa=data.mesas[0].numMesa;
         localStorage.setItem("numMesa",numMesa);
         window.location.href = '/Reservas/html/iconfirmacion.html';
         
       } else if (data.length== 0) {
-        alert(`❌ No hay disponibilidad para esta ${fecha}`);
+        let message=`❌ No hay disponibilidad para esta ${fecha}`;
+        AlertMessage(message);
+
       } else {
         alert("⚠️ " + (data.error || "Error al comprobar disponibilidad."));
       }

@@ -46,7 +46,7 @@ async function getMesas(idSala){
 
 const btnRes = document.getElementById('reservar');
 btnRes.addEventListener('click', function() {
-    window.location.href = '../Reservas/html/index.html';
+    window.location.href = '../Reservas/html/indexsalas.html';
   
   })
 

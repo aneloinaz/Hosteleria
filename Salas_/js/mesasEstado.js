@@ -53,7 +53,6 @@ async function actualizarContador(fecha){
     comensales += mesa.numComensales;
     console.log("Num Mesa: "+mesa.numMesa + "-- comensales: " + mesa.numComensales);
   });
-  console.log(comensales);
   document.getElementById("contador").textContent = comensales;
 }
 

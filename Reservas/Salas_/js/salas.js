@@ -1,6 +1,5 @@
 import { actualizarEstado } from "./mesasEstado.js";
 document.addEventListener('DOMContentLoaded', async () => {
-    localStorage.clear();
     let cont  = 0;
     async function actualizarMesas() {
         const salasData = await getSalas();
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Llamada inicial
     await actualizarMesas();
     // Actualización cada 5 segundos
-    setInterval(actualizarEstado, 5000);
+    setInterval(actualizarEstado, 1000);
 });
 
 const generarMesas = (mesas) => {

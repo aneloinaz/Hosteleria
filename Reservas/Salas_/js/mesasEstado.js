@@ -1,9 +1,11 @@
+import { AlertConfirm } from "/components/AlertComponents.js";
+
 export async function actualizarEstado(){
-      const fecha = new Date().toISOString().slice(0,10);
+      //const fecha = new Date().toISOString().slice(0,10);
+      const fecha=localStorage.getItem("fecha");
   const mesas = document.getElementsByClassName("mesa");
 
     const estados = await cargarEstadosDesdeJSON(fecha);
-    actualizarContador(fecha);
 
     Array.from(mesas).forEach(mesa => {
         const ID = parseInt(mesa.dataset.id);
@@ -25,54 +27,28 @@ export async function actualizarEstado(){
     }
 }
 
-function cambiarColorMesa(mesaElemento, estado) {
+async function cambiarColorMesa(mesaElemento, estado) {
    if (estado==0) {
      mesaElemento.style.backgroundColor = "green"; // Libre
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = 'info1.html'});
-   } else if (estado==1) {
+     mesaElemento.addEventListener('click', async function() {
+      let message='¿estas seguro que quieres esa mesa?';
+      let redirection= "/Reservas/html/iconfirmacion.html";
+      
+      if(await AlertConfirm(message)){
+         const idMesa = this.getAttribute('data-id');         
+         localStorage.setItem('mesaSeleccionada', idMesa);
+          window.location.href = redirection;
+      }
+     })
+
+   
+               
+   } else if (estado==1 || estado==2 || estado==3) {
      mesaElemento.style.backgroundColor = "red"; // Reservado
-     mesaElemento.addEventListener('click', function() {
+     /*mesaElemento.addEventListener('click', function() {
                 const idMesa = this.getAttribute('data-id'); 
                 localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   } else if (estado==2) {
-     mesaElemento.style.backgroundColor = "orange"; // Comanda pedida
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   } else if (estado==3) {
-     mesaElemento.style.backgroundColor = "blue"; // Finalizado
-     mesaElemento.addEventListener('click', function() {
-                const idMesa = this.getAttribute('data-id'); 
-                localStorage.setItem('mesaSeleccionada', idMesa);
-                 window.location.href = '../Comandero/html/menu.html'});
-   }
-
-  
-
-}
-
-async function actualizarContador(fecha){
-  const data = await getComensalesMesa(fecha);
-  let comensales = 0;
-  data.mesas.forEach(mesa =>{
-    comensales=+ mesa.numComensales;
-    console.log("Num Mesa: "+mesa.numMesa + "comensales: " + mesa.numComensales);
-  });
-  
-  document.getElementById("contador").textContent = comensales;
-}
-
-async function getComensalesMesa(fecha){
-  try{
-    const response = await fetch(`https://apiostalaritza.lhusurbil.eus/GetMesasOcupadasFecha?fecha=${fecha}`);
-    const data = await response.json();
-    return data;
-  }catch(e){
-    console.error("Error al hacer la peticion: "+e);
+                 window.location.href = '/Reservas/html/iconfirmacion.html'});*/
   }
+
 }

@@ -1,31 +1,18 @@
 import { AlertMessage } from "../../components/AlertComponents.js";
-document.addEventListener('DOMContentLoaded', async () => {
-    const mesaId = localStorage.getItem('mesaSeleccionada');
-    if (!mesaId) return;
 
-    // Obtener productos de la comanda (enviados)
-    let productosEnviados = [];
-    try {
-        const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
-        const dataComandas = await resComandas.json();
-        const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
-        for (const comanda of comandas) {
-            const idComanda = comanda.idComanda;
-            if (!idComanda) continue;
-            const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
-            const detalleData = await detalleRes.json();
-            if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
-                productosEnviados = productosEnviados.concat(detalleData.detalleComandas.map(d => d.idProducto));
-            }
-        }
-    } catch (error) {
-        console.error("Error obteniendo productos enviados:", error);
-    }
+let pedidoActual = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarPedidoEnFactura();
+    mostrarFechaYHora();
+    mostrarInfoExtra();
+
+    document.getElementById("boton-imprimir").addEventListener("click", imprimirSub);
 });
 
-function mostrarPedidoEnCobrar() {
+async function mostrarPedidoEnFactura() {
     const lista = document.getElementById('listaCobro');
-    lista.innerHTML = '';
+    lista.innerHTML = ''; // Limpiar la lista antes de añadir nuevos elementos
 
     const mesaId = localStorage.getItem('mesaSeleccionada');
     if (!mesaId) {
@@ -33,67 +20,89 @@ function mostrarPedidoEnCobrar() {
         return;
     }
 
-    const pedidoGuardado = localStorage.getItem(`pedido_mesa_${mesaId}`);
-    if (!pedidoGuardado) {
+    let pedidoGuardado = [];
+    try {
+        const resComandas = await fetch(`https://apiostalaritza.lhusurbil.eus/GetComandasMesaAbiertas?idMesa=${mesaId}`);
+        const dataComandas = await resComandas.json();
+        const comandas = Array.isArray(dataComandas.comandas) ? dataComandas.comandas : [];
+
+        // Recoger los detalles de cada comanda
+        for (const comanda of comandas) {
+            const idComanda = comanda.idComanda;
+            if (!idComanda) continue;
+            const detalleRes = await fetch(`https://apiostalaritza.lhusurbil.eus/GetDetalleComanda?idComanda=${idComanda}`);
+            const detalleData = await detalleRes.json();
+            if (detalleData.detalleComandas && Array.isArray(detalleData.detalleComandas)) {
+                pedidoGuardado = pedidoGuardado.concat(detalleData.detalleComandas);
+            }
+        }
+    } catch (error) {
+        console.error("Error al recuperar las comandas:", error);
+        lista.innerHTML = '<li>Error al cargar el pedido.</li>';
+        return;
+    }
+
+    // Si no hay productos en el pedido
+    if (!pedidoGuardado || pedidoGuardado.length === 0) {
         lista.innerHTML = '<li>No hay productos en el pedido.</li>';
         return;
     }
 
-    const pedido = JSON.parse(pedidoGuardado);
-    if (pedido.length === 0) {
-        lista.innerHTML = '<li>No hay productos en el pedido.</li>';
-        return;
-    }
+    pedidoActual = pedidoGuardado;
 
-    pedido.forEach(item => {
+    // Mostrar los productos en la lista de la factura
+    pedidoGuardado.forEach(item => {
         const li = document.createElement('li');
         const subtotal = (item.precio * item.cantidad).toFixed(2);
         li.textContent = `${item.nombre} x${item.cantidad} - ${subtotal}€`;
         lista.appendChild(li);
     });
 
-    localStorage.setItem('pedido', JSON.stringify(pedido)); // para usarlo en otras funciones
-    mostrarTotalEnCobrar();
-    generarQR();
+    mostrarTotales(pedidoGuardado);
 }
 
-function mostrarTotalEnCobrar() {
-    const pedidoGuardado = localStorage.getItem('pedido');
+function mostrarTotales(pedido) {
     const totalSpan = document.getElementById('total');
-    let total = 0;
-
-    if (pedidoGuardado) {
-        const pedido = JSON.parse(pedidoGuardado);
-        total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-    }
-
+    let total = pedido.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
     totalSpan.textContent = total.toFixed(2);
 
-    calcularBase();
-    calcularCuota();
-    calcularMediaxComensal();
+    // Llamadas a las funciones de cálculo de totales
+    calcularBase(total);
+    calcularCuota(total);
+    // calcularMediaxComensal(total);
 }
-function calcularBase() {
-    const total = parseFloat(document.getElementById('total').textContent);
+
+function calcularBase(total) {
     const base = total / 1.10;
     document.getElementById('base-iva').textContent = base.toFixed(2);
 }
 
-function calcularCuota() {
-    const total = parseFloat(document.getElementById('total').textContent);
+function calcularCuota(total) {
     const cuota = total * 0.10;
     document.getElementById('cuota-iva').textContent = cuota.toFixed(2);
 }
 
-function calcularMediaxComensal() {
-    const total = parseFloat(document.getElementById('total').textContent);
-    const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
-    document.getElementById('comensales').textContent = numComensales;
-    const mediaxComensal = total / numComensales;
-    document.getElementById('mediaxComensal').textContent = mediaxComensal.toFixed(2);
+// function calcularMediaxComensal(total) {
+//     const numComensales = parseInt(localStorage.getItem('numComensales'), 10) || 1;
+//     document.getElementById('comensales').textContent = numComensales;
+//     const media = total / numComensales;
+//     document.getElementById('mediaxComensal').textContent = media.toFixed(2);
+// }
+
+function mostrarFechaYHora() {
+    const ahora = new Date();
+    const formato = ahora.toLocaleString();
+    document.getElementById('fecha-hora').textContent = `Fecha y hora: ${formato}`;
 }
 
-function imprimirSub() {
+function mostrarInfoExtra() {
+    const salaMesa = localStorage.getItem('salaMesa') || '';
+    const formaPago = localStorage.getItem('formaPago') || '';
+    document.getElementById('sala-mesa').textContent = `Sala/Mesa: ${salaMesa}`;
+    document.getElementById('forma-pago').textContent = `Forma de pago: ${formaPago}`;
+}
+
+export function imprimirSub() {
     const ticket = document.getElementById('ticket');
     const ventanaImpresion = window.open('', '', 'width=600,height=400');
     ventanaImpresion.document.write('<html><head><title>Ticket de compra</title></head><body>');
@@ -101,34 +110,14 @@ function imprimirSub() {
     ventanaImpresion.document.write('<style>body{font-family: Arial, sans-serif;}</style>');
     ventanaImpresion.document.close();
     ventanaImpresion.print();
-    ventanaImpresion.close();
-    let message = 'El ticket se ha impreso correctamente';
+    
+    // Cerrar la ventana de impresión después de un segundo (tiempo suficiente para imprimir)
+    setTimeout(() => {
+        ventanaImpresion.close();
+    }, 1000);
+
+    // Mensaje de confirmación y redirección
+    let message = 'El ticket se ha imprimido correctamente.';
     let redirection = "../../Salas_/sala1.html";
-    AlertMessage(message,redirection);
-}
-
-function mostrarFechaYHora() {
-    const ahora = new Date();
-    const formato = ahora.toLocaleString();
-    document.getElementById('fecha-hora').textContent = formato;
-}
-
-function mostrarInfoExtra() {
-    const salaMesa = localStorage.getItem('salaMesa') || '';
-    const formaPago = localStorage.getItem('formaPago') || '';
-    document.getElementById('sala-mesa').textContent = salaMesa;
-    document.getElementById('forma-pago').textContent = formaPago;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    mostrarPedidoEnCobrar();
-    mostrarFechaYHora();
-    mostrarInfoExtra();
-});
-
-if (!window.domReadyListenerAdded) {
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM completamente cargado");
-  });
-  window.domReadyListenerAdded = true;
+    AlertMessage(message, redirection);
 }

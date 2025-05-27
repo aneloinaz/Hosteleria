@@ -45,3 +45,44 @@ body {
   border-top: 1px dashed #000;
   padding-top: 5px;
 }
+
+#boton-imprimir {
+  background: #0a2e60;
+  color: rgb(255, 255, 255);
+  padding: 12px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-color: #000000;
+  border-width: 2px;
+  border-style: solid;
+ font-weight:bold ;
+  
+  
+
+}
+
+#boton-imprimir:hover {
+  background: #000000;
+  color: white;
+}
+
+#boton-finalizar{
+  background: #fa9600;
+  color: rgb(0, 0, 0);
+  padding: 12px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+  float: right;
+  border-width: 2px;
+  border-style: solid;
+  font-weight:bold ;
+}
+
+#boton-finalizar:hover {
+  background: #000000;
+  color: white;
+}

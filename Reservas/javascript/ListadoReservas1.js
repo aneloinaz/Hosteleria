@@ -1,7 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const tablaBody = document.getElementById("ListadoReservas");
   const fechaInput = document.getElementById("fechaInput");
-  const buscarBtn = document.getElementById("buscarBtn");
+   //const hoy = new Date().toISOString().split("T")[0];
+  //fechaInput.value = hoy;
+  //cargarReservas(hoy);
+ // const buscarBtn = document.getElementById("buscarBtn");
 
   // Función para cargar reservas para una fecha
   function cargarReservas(fecha) {
@@ -33,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>  <button onclick="eliminarReserva(${reserva.idReserva})">-</button> </td>
           `;
           tablaBody.appendChild(fila);
+
         });
       })
       .catch(error => {
@@ -52,9 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // (Opcional) cargar reservas de hoy al inicio
-  const hoy = new Date().toISOString().split("T")[0];
-  fechaInput.value = hoy;
-  cargarReservas(hoy);
+ 
 });
 document.addEventListener("DOMContentLoaded", () => {
   const agregarBtn = document.getElementById("agregarBtn");
@@ -86,10 +88,10 @@ function eliminarReserva(idreserva){
         else
             cargarReservas(fechaInput);
       })
-      .catch(error => {
+      /*.catch(error => {
         console.error("Error al eliminar:", error);
-        
-      });
+        alert("No se pudo eliminar la reserva ssSS");
+      });*/
   }
 
 
